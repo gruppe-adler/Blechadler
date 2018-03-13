@@ -11,6 +11,9 @@ const targetChannel = [];
 /*
     Functions
  */
+/**
+ * Setups the discord client
+ */
 function setupDiscordClient() {
     client.on('ready', () => {
         console.log(`Logged in as ${client.user.tag}!`);
@@ -66,6 +69,10 @@ function parseMention(message) {
         }
 
         response = source[Math.floor(Math.random() * source.length)];
+    }
+
+    if (response.indexOf('Jörgn') > -1) {
+        response = 'Jörgn ist mein Meister';
     }
 
     if (response === '') {
@@ -178,6 +185,11 @@ function setupTeamspeakQuery() {
         }
     });
 
+    /**
+     * Compares a past unix timestamp with the current time and returns the difference in milliseconds
+     * @param unixTimestamp
+     * @returns {boolean}
+     */
     function isNewUser(unixTimestamp) {
         const date = new Date(unixTimestamp*1000);
         const now = new Date();
@@ -185,6 +197,9 @@ function setupTeamspeakQuery() {
         return dif < 3000;
     }
 
+    /**
+     * Sends a ping to the server query to prevent a timeout after 10 minutes idling
+     */
     function sendPing() {
         teamspeakClient.send('version', () => {
             console.log('ts query ping');
@@ -261,7 +276,7 @@ function getEmoji(guild, name) {
 }
 
 /*
-    Main
+    Init
  */
 setupDiscordClient();
 setupTeamspeakQuery();
