@@ -2,6 +2,8 @@
   "name": "Blechadler",
   "version": "1.0.0",
   "description": "Blech + Adler = Blechadler",
+  "license": "GPL-2.0-only",
+  "repository": "github:gruppe-adler/Blechadler",
   "main": "bot.js",
   "author": "chris579",
   "dependencies": {
