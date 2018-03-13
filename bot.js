@@ -1,11 +1,11 @@
 const auth = require('./auth.json');
 const config = require('./config.json');
+const packageInfo = require('./package.json');
 const Discord = require('discord.js');
 const TeamspeakClient = require('node-teamspeak');
 
 const client = new Discord.Client();
-const teamspeakClient = new TeamspeakClient(config.teamspeak.serverip);
-const commandChar = '!';
+const teamspeakClient = new TeamspeakClient(config.teamspeak.serverip, config.teamspeak.queryport);
 const targetChannel = [];
 
 /*
@@ -18,30 +18,37 @@ function setupDiscordClient(callback) {
         callback();
     });
 
-    client.on('message', (msg) => {
-        if (hasBeenMentionend(msg)) {
-            console.log('mention detected');
-        } else if (msg.content.startsWith(commandChar)) {
-            const rawCommand = msg.content.slice(1, msg.content.length);
-            console.log('received command', rawCommand);
-            switch (rawCommand) {
-                case 'ts': {
-                    sendClientList(msg);
-                } break;
-            }
+    client.on('message', (message) => {
+        if (hasBeenMentionend(message)) {
+            parseMention(message);
+        } else if (message.content.startsWith(config.commandSymbol)) {
+            parseCommand(message);
         }
     });
 
     client.login(auth.token);
 }
 
+function parseMention(message) {
+
+}
+
+function parseCommand(message) {
+    const command = message.content.slice(1, message.content.length);
+    switch (command) {
+        case 'ts': {
+            sendClientList(message);
+        } break;
+    }
+}
+
 function parseTargetChannel() {
     client.guilds.forEach(guild => {
         guild.channels.forEach((value, key) => {
-            if (value.name === config.teamspeak.noticesTargetChannel) {
+            if (config.teamspeak.noticesTargetChannel.indexOf(value.name) > -1) {
                 const channel = new Discord.TextChannel(guild, value);
                 targetChannel.push(channel);
-                channel.send('Ein wilder Blechadler ist erschienen');
+                // channel.send('Ein wilder Blechadler ist erschienen');
                 console.log('found target channel', channel.id);
             }
         });
@@ -76,6 +83,12 @@ function setupTeamspeakQuery(callback) {
 }
 
 function sendClientList(message) {
+    if (config.teamspeak.noticesTargetChannel.indexOf(message.channel.name) === -1) {
+        message.channel.send('Du bist leider im falschen Channel dafür :(');
+        console.log('ts command issued from non permitted channel');
+        return;
+    }
+
     teamspeakClient.send('clientlist', {'-away': '', '-info': '', '-times': ''}, (err, response) => {
         if (err) {
             console.log(err);
@@ -114,6 +127,8 @@ function sendClientList(message) {
 
 function checkForNewClients() {
     const registeredNewClients = [];
+    const currentClients = [];
+    let isStartup = true;
 
     function checkInternal() {
         teamspeakClient.send('clientlist', {'-away': '', '-info': '', '-times': ''}, (err, response) => {
@@ -126,17 +141,34 @@ function checkForNewClients() {
                 response = [response];
             }
 
+            // Filter new clients
             response.forEach(current => {
                 // Filter out server query clients
-                if (current.client_type !== 1 && isNewUser(current.client_database_id, current.client_created)) {
-                    registeredNewClients.push(current.client_database_id);
-                    const message = `@here \`${current.client_nickname}\` ist neu. Will ihm jemand weiterhelfen?`;
-                    targetChannel.forEach(channel => {
-                        channel.send(message);
-                    });
-                    console.log('new user', current.client_database_id);
+                if (current.client_type !== 1) {
+                    if (isNewUser(current.client_database_id, current.client_created)) {
+                        registeredNewClients.push(current.client_database_id);
+                        broadcastMessage(`@here \`${current.client_nickname}\` ist neu. Will ihm jemand weiterhelfen?`);
+                        console.log('new user', current.client_database_id);
+                    }
+
+                    if (currentClients.every((value => value.client_database_id !== current.client_database_id))) {
+                        currentClients.push(current);
+                        console.log('joined', current.client_nickname);
+                        if (!isStartup) {
+                            broadcastMessage(`\`${current.client_nickname}\` hat das Teamspeak betreten`);
+                        }
+                    }
                 }
             });
+
+            // Filter old clients
+            currentClients.filter((value) => response.every(stored => value.client_database_id !== stored.client_database_id)).forEach(current => {
+                console.log('left', current.client_nickname);
+                currentClients.splice(currentClients.indexOf(current), 1);
+                broadcastMessage(`\`${current.client_nickname}\` hat das Teamspeak verlassen`);
+            });
+
+            isStartup = false;
         });
 
         setTimeout(checkInternal, 5000);
@@ -147,13 +179,18 @@ function checkForNewClients() {
             const date = new Date(unixTimestamp*1000);
             const now = new Date();
             const dif = now.getTime() - date.getTime();
-            console.log('dif', dif);
-            return dif < 8000;
+            return dif < 12000;
         }
         return false;
     }
 
     checkInternal();
+}
+
+function broadcastMessage(message, options) {
+    targetChannel.forEach(channel => {
+        channel.send(message, options);
+    });
 }
 
 /*
@@ -164,4 +201,3 @@ setupDiscordClient(() => {
         checkForNewClients();
     });
 });
-

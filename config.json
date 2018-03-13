@@ -3,6 +3,7 @@
     "serverip": "ts.gruppe-adler.de",
     "queryport": 10011,
     "sid": 2,
-    "noticesTargetChannel": "general"
-  }
+    "noticesTargetChannel": ["ts"]
+  },
+  "commandSymbol": "!"
 }
