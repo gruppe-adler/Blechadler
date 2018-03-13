@@ -137,6 +137,11 @@ function setupTeamspeakQuery() {
     teamspeakClient = new TeamspeakClient(config.teamspeak.serverip, config.teamspeak.queryport);
     const activeUsers = {};
 
+    /*
+     * Handles successful server query connections
+     * Logs into server query with provided credentials and selects the target virtual server
+     * Registers a server notify event to catch joining/leaving users
+     */
     teamspeakClient.on('connect', () => {
         teamspeakClient.send('login', {client_login_name: auth.serverquery.username, client_login_password: auth.serverquery.password}, (err, response) => {
             if (err) {
@@ -157,15 +162,26 @@ function setupTeamspeakQuery() {
         });
     });
 
+    /*
+     * Handles when the server query connection has been closed
+     * Provides an auto reconnect
+     */
     teamspeakClient.on('close', () => {
         console.log('auto reconnecting to teamspeak server query');
         setTimeout(setupTeamspeakQuery, 3000);
     });
+    /*
+     * Handles when the server query connection has failed
+     * Provides an auto reconnect
+     */
     teamspeakClient.on('error', () => {
         console.log('auto reconnecting to teamspeak server query');
         setTimeout(setupTeamspeakQuery, 3000);
     });
 
+    /*
+     * Called when a client enters teamspeak
+     */
     teamspeakClient.on('cliententerview', response => {
         if (response.client_type === 0) {
             broadcastMessage(`\`${response.client_nickname}\` hat das Teamspeak betreten`);
@@ -178,6 +194,9 @@ function setupTeamspeakQuery() {
         }
     });
 
+    /*
+     * Called when a client leaves teamspeak
+     */
     teamspeakClient.on('clientleftview', response => {
         if (activeUsers[response.clid.toString()]) {
             const username = activeUsers[response.clid.toString()];
@@ -208,6 +227,9 @@ function setupTeamspeakQuery() {
         });
     }
 
+    /**
+     * Caches all clients on startup to provide a working disconnect notify logic even if the user was already connected
+     */
     function cacheClients() {
         teamspeakClient.send('clientlist', {'-info': ''}, (err, response) => {
             if (err) {
