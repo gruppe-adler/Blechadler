@@ -5,5 +5,27 @@
     "sid": 2,
     "noticesTargetChannel": ["ts"]
   },
+  "questioning": {
+    "yesAnswers": [
+      "Ich denke schon",
+      "Gut denkbar",
+      "Ja, würde ich schon sagen",
+      "Definitiv",
+      "Natürlich, was hast du denn gedacht?"
+    ],
+    "noAnswers": [
+      "Definitiv nicht",
+      "Glaube ich nicht",
+      "Das stimmt definitiv nicht",
+      "Da hast du unrecht"
+    ],
+    "otherAnswers": [
+      "Geh XiviD fragen",
+      "Darauf will ich nicht antworten",
+      "Die Frage ist mir zu peinlich",
+      "Schönes Wetter heute",
+      "Ich mag dich nicht"
+    ]
+  },
   "commandSymbol": "!"
 }

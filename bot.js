@@ -41,7 +41,6 @@ function parseMention(message) {
     switch (parsedMessage) {
         case 'über':
         case 'help':
-        case '?':
         case '': {
             response = 'Ich bin der Blechadler, eine Kombination aus Adler, Blech und Strom';
         } break;
@@ -53,13 +52,16 @@ function parseMention(message) {
 
     if (parsedMessage.endsWith('?')) {
         const random = Math.random();
+        let source;
         if (random > 0.6) {
-            response = 'Definitiv nicht';
+            source = config.questioning.noAnswers;
         } else if (random < 0.4) {
-            response = 'Ich denke schon';
+            source = config.questioning.yesAnswers;
         } else {
-            response = 'Geh XiviD fragen';
+            source = config.questioning.otherAnswers;
         }
+
+        response = source[Math.floor(Math.random() * source.length)];
     }
 
     if (response === '') {
