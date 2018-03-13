@@ -5,7 +5,7 @@ const Discord = require('discord.js');
 const TeamspeakClient = require('node-teamspeak');
 
 const client = new Discord.Client();
-const teamspeakClient = new TeamspeakClient(config.teamspeak.serverip, config.teamspeak.queryport);
+let teamspeakClient;
 const targetChannel = [];
 
 /*
@@ -108,22 +108,35 @@ function hasBeenMentionend(message) {
 }
 
 function setupTeamspeakQuery() {
+    teamspeakClient = new TeamspeakClient(config.teamspeak.serverip, config.teamspeak.queryport);
     const activeUsers = {};
 
-    teamspeakClient.send('login', {client_login_name: auth.serverquery.username, client_login_password: auth.serverquery.password}, (err, response) => {
-        if (err) {
-            console.log('failed to login into ts query', err);
-        }
-
-        teamspeakClient.send('use', {sid: config.teamspeak.sid}, (err, response) => {
+    teamspeakClient.on('connect', () => {
+        teamspeakClient.send('login', {client_login_name: auth.serverquery.username, client_login_password: auth.serverquery.password}, (err, response) => {
             if (err) {
-                console.log('failed to select virtual server', err);
-            } else {
-                teamspeakClient.send('servernotifyregister', {event: 'server'}, (err, response) => {
-                    console.log('connected and logged into ts query');
-                });
+                console.log('failed to login into ts query', err);
             }
+
+            teamspeakClient.send('use', {sid: config.teamspeak.sid}, (err, response) => {
+                if (err) {
+                    console.log('failed to select virtual server', err);
+                } else {
+                    teamspeakClient.send('servernotifyregister', {event: 'server'}, (err, response) => {
+                        console.log('connected and logged into ts query');
+                        sendPing();
+                    });
+                }
+            });
         });
+    });
+
+    teamspeakClient.on('close', () => {
+        console.log('auto reconnecting to teamspeak server query');
+        setTimeout(setupTeamspeakQuery, 3000);
+    });
+    teamspeakClient.on('error', () => {
+        console.log('auto reconnecting to teamspeak server query');
+        setTimeout(setupTeamspeakQuery, 3000);
     });
 
     teamspeakClient.on('cliententerview', response => {
@@ -151,6 +164,13 @@ function setupTeamspeakQuery() {
         const now = new Date();
         const dif = now.getTime() - date.getTime();
         return dif < 3000;
+    }
+
+    function sendPing() {
+        teamspeakClient.send('version', () => {
+            console.log('ts query ping');
+            setTimeout(sendPing, 60000);
+        });
     }
 }
 
