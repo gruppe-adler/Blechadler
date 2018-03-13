@@ -28,6 +28,10 @@ function setupDiscordClient() {
     client.login(auth.token);
 }
 
+/**
+ * Called when bot was mentioned
+ * @param message
+ */
 function parseMention(message) {
     const mentionEnd = message.content.indexOf('>') + 2;
     let parsedMessage = message.content.substr(mentionEnd, message.content.length - mentionEnd);
@@ -42,7 +46,7 @@ function parseMention(message) {
         case 'über':
         case 'help':
         case '': {
-            response = 'Ich bin der Blechadler, eine Kombination aus Adler, Blech und Strom';
+            response = `Ich bin der Blechadler, eine Kombination aus Adler, Blech und Strom ${getEmoji(message.guild, 'adlerkopp')}`;
         } break;
 
         case 'version': {
@@ -65,12 +69,16 @@ function parseMention(message) {
     }
 
     if (response === '') {
-        response = 'Machst du mich extra von der Seite an?';
+        response = `Machst du mich extra von der Seite an? 💩`;
     }
 
     message.channel.send(response);
 }
 
+/**
+ * Called when a message starting with the command symbol was written
+ * @param message
+ */
 function parseCommand(message) {
     const command = message.content.slice(1, message.content.length);
     switch (command) {
@@ -80,13 +88,16 @@ function parseCommand(message) {
     }
 }
 
+/**
+ * Searches in all guilds for channels teamspeak notices should be posted in
+ */
 function parseTargetChannel() {
     client.guilds.forEach(guild => {
         guild.channels.forEach((value, key) => {
             if (config.teamspeak.noticesTargetChannel.indexOf(value.name) > -1) {
                 const channel = new Discord.TextChannel(guild, value);
                 targetChannel.push(channel);
-                channel.send('Ein wilder Blechadler ist erschienen');
+                channel.send(`Ein wilder Blechadler ist erschienen ${getEmoji(guild, 'adlerkopp')}`);
                 console.log('found target channel', channel.id);
             }
         });
@@ -96,6 +107,11 @@ function parseTargetChannel() {
     }
 }
 
+/**
+ * Checks if the bot has been mentioned
+ * @param message
+ * @returns {boolean}
+ */
 function hasBeenMentionend(message) {
     if (!message.mentions || !message.mentions.members) {
         return false;
@@ -107,6 +123,9 @@ function hasBeenMentionend(message) {
     return result !== undefined && result !== null;
 }
 
+/**
+ * Setups a teamspeak client, connects to the specified server query and reconnects if connection has been lost
+ */
 function setupTeamspeakQuery() {
     teamspeakClient = new TeamspeakClient(config.teamspeak.serverip, config.teamspeak.queryport);
     const activeUsers = {};
@@ -145,7 +164,7 @@ function setupTeamspeakQuery() {
             teamspeakClient.send('clientinfo', {clid: response.clid}, (err, clientData) => {
                 activeUsers[response.clid.toString()] = clientData.client_nickname;
                 if (isNewUser(clientData.client_created)) {
-                    broadcastMessage(`@here \`${response.client_nickname}\` ist neu. Will ihm jemand weiterhelfen?`);
+                    broadcastMessage(`@here \`${response.client_nickname}\` ist neu. Will ihm jemand weiterhelfen? 🌵`);
                 }
             });
         }
@@ -155,7 +174,7 @@ function setupTeamspeakQuery() {
         if (activeUsers[response.clid.toString()]) {
             const username = activeUsers[response.clid.toString()];
             delete activeUsers[response.clid.toString()];
-            broadcastMessage(`\`${username}\` hat das Teamspeak verlassen`);
+            broadcastMessage(`\`${username}\` hat das Teamspeak verlassen 🚪`);
         }
     });
 
@@ -174,9 +193,13 @@ function setupTeamspeakQuery() {
     }
 }
 
+/**
+ * Sends the teamspeak client list to the message origin channel
+ * @param message
+ */
 function sendClientList(message) {
     if (config.teamspeak.noticesTargetChannel.indexOf(message.channel.name) === -1) {
-        message.channel.send('Du bist leider im falschen Channel dafür :(');
+        message.channel.send(`Du bist leider im falschen Channel dafür ☹`);
         console.log('ts command issued from non permitted channel');
         return;
     }
@@ -184,7 +207,7 @@ function sendClientList(message) {
     teamspeakClient.send('clientlist', {'-away': '', '-info': '', '-times': ''}, (err, response) => {
         if (err) {
             console.log(err);
-            message.channel.send('Da ist leider was schiefgegangen. Bitte sei mir nicht böse :(');
+            message.channel.send(`Da ist leider was schiefgegangen. Bitte sei mir nicht böse ☹`);
             return;
         }
 
@@ -196,7 +219,7 @@ function sendClientList(message) {
         response.forEach(current => {
             // Filter out server query clients
             if (current.client_type !== 1) {
-                formattedResponse += current.client_nickname
+                formattedResponse += current.client_nickname;
                 if (current.client_away) {
                     formattedResponse += ' (AFK)';
                 } else {
@@ -210,16 +233,31 @@ function sendClientList(message) {
         });
 
         if (formattedResponse === '') {
-            formattedResponse = 'Keiner online :(';
+            formattedResponse = `Keiner online ☹`;
         }
         message.channel.send(formattedResponse, {code: true, split: true});
     });
 }
 
+/**
+ * Broadcasts a message to all channels teamspeak notices should be posted in
+ * @param message
+ * @param options
+ */
 function broadcastMessage(message, options) {
     targetChannel.forEach(channel => {
         channel.send(message, options);
     });
+}
+
+/**
+ * Gets the emoji associated with name
+ * @param guild
+ * @param name
+ * @returns {Emoji}
+ */
+function getEmoji(guild, name) {
+    return guild.emojis.find('name', name);
 }
 
 /*
