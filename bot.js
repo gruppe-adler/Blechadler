@@ -150,6 +150,7 @@ function setupTeamspeakQuery() {
                     teamspeakClient.send('servernotifyregister', {event: 'server'}, (err, response) => {
                         console.log('connected and logged into ts query');
                         sendPing();
+                        cacheClients();
                     });
                 }
             });
@@ -204,6 +205,26 @@ function setupTeamspeakQuery() {
         teamspeakClient.send('version', () => {
             console.log('ts query ping');
             setTimeout(sendPing, 60000);
+        });
+    }
+
+    function cacheClients() {
+        teamspeakClient.send('clientlist', {'-info': ''}, (err, response) => {
+            if (err) {
+                console.log(err);
+                return;
+            }
+
+            if (!Array.isArray(response)) {
+                response = [response];
+            }
+
+            response.forEach(current => {
+                // Filter out server query clients
+                if (current.client_type !== 1) {
+                    activeUsers[current.clid.toString()] = current.client_nickname;
+                }
+            });
         });
     }
 }
