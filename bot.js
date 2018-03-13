@@ -36,7 +36,6 @@ function parseMention(message) {
         parsedMessage = parsedMessage.substr(0, 1);
     }
 
-    console.log(parsedMessage);
     let response = '';
 
     switch (parsedMessage) {
@@ -48,7 +47,7 @@ function parseMention(message) {
         } break;
 
         case 'version': {
-            response = `${name} version ${version}`;
+            response = `${packageInfo.name} Version ${packageInfo.version}`;
         } break;
     }
 
