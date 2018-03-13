@@ -30,7 +30,41 @@ function setupDiscordClient(callback) {
 }
 
 function parseMention(message) {
+    const mentionEnd = message.content.indexOf('>') + 2;
+    let parsedMessage = message.content.substr(mentionEnd, message.content.length - mentionEnd);
+    // Remove all spaces in the beginning
+    while (parsedMessage.startsWith(' ')) {
+        parsedMessage = parsedMessage.substr(0, 1);
+    }
 
+    console.log(parsedMessage);
+    let response = '';
+
+    switch (parsedMessage) {
+        case 'über':
+        case 'help':
+        case '?':
+        case '': {
+            response = 'Ich bin der Blechadler, eine Kombination aus Adler, Blech und Strom';
+        } break;
+    }
+
+    if (parsedMessage.endsWith('?')) {
+        const random = Math.random();
+        if (random > 0.6) {
+            response = 'Definitiv nicht';
+        } else if (random < 0.4) {
+            response = 'Ich denke schon';
+        } else {
+            response = 'Geh XiviD fragen';
+        }
+    }
+
+    if (response === '') {
+        response = 'Machst du mich extra von der Seite an?';
+    }
+
+    message.channel.send(response);
 }
 
 function parseCommand(message) {
