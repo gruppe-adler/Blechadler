@@ -95,6 +95,10 @@ function parseTargetChannel() {
 }
 
 function hasBeenMentionend(message) {
+    if (!message.mentions || !message.mentions.members) {
+        return false;
+    }
+
     const result = message.mentions.members.find((value, key) => {
         return value.user.id === client.user.id;
     });
