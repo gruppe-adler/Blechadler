@@ -1,0 +1,17 @@
+{
+  "name": "Blechadler",
+  "version": "1.0.0",
+  "description": "Blech + Adler = Blechadler",
+  "main": "bot.js",
+  "author": "chris579",
+  "dependencies": {
+    "discord.js": "^11.3.2",
+    "node-teamspeak": "^1.0.10",
+    "threads": "^0.10.1",
+    "uws": "^9.14.0",
+    "winston": "^3.0.0-rc2"
+  },
+  "scripts": {
+    "start": "node bot.js"
+  }
+}
