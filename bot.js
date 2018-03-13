@@ -6,15 +6,16 @@ const TeamspeakClient = require('node-teamspeak');
 const client = new Discord.Client();
 const teamspeakClient = new TeamspeakClient(config.teamspeak.serverip);
 const commandChar = '!';
-let targetChannel = [];
+const targetChannel = [];
 
 /*
     Functions
  */
-function setupDiscordClient() {
+function setupDiscordClient(callback) {
     client.on('ready', () => {
         console.log(`Logged in as ${client.user.tag}!`);
         parseTargetChannel();
+        callback();
     });
 
     client.on('message', (msg) => {
@@ -38,8 +39,10 @@ function parseTargetChannel() {
     client.guilds.forEach(guild => {
         guild.channels.forEach((value, key) => {
             if (value.name === config.teamspeak.noticesTargetChannel) {
-                targetChannel.push(value);
-                console.log('found target channel', value.id);
+                const channel = new Discord.TextChannel(guild, value);
+                targetChannel.push(channel);
+                channel.send('Ein wilder Blechadler ist erschienen');
+                console.log('found target channel', channel.id);
             }
         });
     });
@@ -55,7 +58,7 @@ function hasBeenMentionend(message) {
     return result !== undefined && result !== null;
 }
 
-function setupTeamspeakQuery() {
+function setupTeamspeakQuery(callback) {
     teamspeakClient.send('login', {client_login_name: auth.serverquery.username, client_login_password: auth.serverquery.password}, (err, response) => {
         if (err) {
             console.log('failed to login into ts query', err);
@@ -66,6 +69,7 @@ function setupTeamspeakQuery() {
                 console.log('failed to select virtual server', err);
             } else {
                 console.log('connected and logged into ts query');
+                callback();
             }
         });
     });
@@ -77,6 +81,10 @@ function sendClientList(message) {
             console.log(err);
             message.channel.send('Da ist leider was schiefgegangen. Bitte sei mir nicht böse :(');
             return;
+        }
+
+        if (!Array.isArray(response)) {
+            response = [response];
         }
 
         let formattedResponse = '';
@@ -96,13 +104,64 @@ function sendClientList(message) {
             }
         });
         message.channel.send(JSON.stringify(response), {code: 'json'});
+
+        if (formattedResponse === '') {
+            formattedResponse = 'Keiner online :(';
+        }
         message.channel.send(formattedResponse, {code: true});
     });
+}
+
+function checkForNewClients() {
+    const registeredNewClients = [];
+
+    function checkInternal() {
+        teamspeakClient.send('clientlist', {'-away': '', '-info': '', '-times': ''}, (err, response) => {
+            if (err) {
+                console.log(err);
+                return;
+            }
+
+            if (!Array.isArray(response)) {
+                response = [response];
+            }
+
+            response.forEach(current => {
+                // Filter out server query clients
+                if (current.client_type !== 1 && isNewUser(current.client_database_id, current.client_created)) {
+                    registeredNewClients.push(current.client_database_id);
+                    const message = `@here \`${current.client_nickname}\` ist neu. Will ihm jemand weiterhelfen?`;
+                    targetChannel.forEach(channel => {
+                        channel.send(message);
+                    });
+                    console.log('new user', current.client_database_id);
+                }
+            });
+        });
+
+        setTimeout(checkInternal, 5000);
+    }
+
+    function isNewUser(userId, unixTimestamp) {
+        if (registeredNewClients.indexOf(userId) === -1) {
+            const date = new Date(unixTimestamp*1000);
+            const now = new Date();
+            const dif = now.getTime() - date.getTime();
+            console.log('dif', dif);
+            return dif < 8000;
+        }
+        return false;
+    }
+
+    checkInternal();
 }
 
 /*
     Main
  */
+setupDiscordClient(() => {
+    setupTeamspeakQuery(() => {
+        checkForNewClients();
+    });
+});
 
-setupDiscordClient();
-setupTeamspeakQuery();
