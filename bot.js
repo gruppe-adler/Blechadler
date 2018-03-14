@@ -76,10 +76,6 @@ function parseMention(message) {
         response = source[Math.floor(Math.random() * source.length)];
     }
 
-    if (response.indexOf('Jörgn') > -1) {
-        response = 'Jörgn ist mein Meister';
-    }
-
     if (response === '') {
         response = `Machst du mich extra von der Seite an? 💩`;
     }
@@ -206,7 +202,7 @@ function setupTeamspeakQuery() {
         if (activeUsers[response.clid.toString()]) {
             const username = activeUsers[response.clid.toString()];
             delete activeUsers[response.clid.toString()];
-            broadcastMessage(`\`${username}\` hat geleaved`);
+            broadcastMessage(`\`${username}\` ist geleaved`);
         }
     });
 
