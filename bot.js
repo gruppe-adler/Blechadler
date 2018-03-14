@@ -55,6 +55,11 @@ function parseMention(message) {
         case 'version': {
             response = `${packageInfo.name} Version ${packageInfo.version}`;
         } break;
+
+        case 'ts': {
+            sendClientList(message);
+            return;
+        }
     }
 
     if (parsedMessage.endsWith('?')) {
@@ -184,11 +189,11 @@ function setupTeamspeakQuery() {
      */
     teamspeakClient.on('cliententerview', response => {
         if (response.client_type === 0) {
-            broadcastMessage(`\`${response.client_nickname}\` hat das Teamspeak betreten`);
+            broadcastMessage(`\`${response.client_nickname}\` ist gejoined`);
             teamspeakClient.send('clientinfo', {clid: response.clid}, (err, clientData) => {
                 activeUsers[response.clid.toString()] = clientData.client_nickname;
                 if (isNewUser(clientData.client_created)) {
-                    broadcastMessage(`@here \`${response.client_nickname}\` ist neu. Will ihm jemand weiterhelfen? 🌵`);
+                    broadcastMessage(`@here \`${response.client_nickname}\` ist neu`);
                 }
             });
         }
@@ -201,7 +206,7 @@ function setupTeamspeakQuery() {
         if (activeUsers[response.clid.toString()]) {
             const username = activeUsers[response.clid.toString()];
             delete activeUsers[response.clid.toString()];
-            broadcastMessage(`\`${username}\` hat das Teamspeak verlassen 🚪`);
+            broadcastMessage(`\`${username}\` hat geleaved`);
         }
     });
 
@@ -258,42 +263,63 @@ function setupTeamspeakQuery() {
 function sendClientList(message) {
     if (config.teamspeak.noticesTargetChannel.indexOf(message.channel.name) === -1) {
         message.channel.send(`Du bist leider im falschen Channel dafür ☹`);
-        console.log('ts command issued from non permitted channel');
         return;
     }
 
-    teamspeakClient.send('clientlist', {'-away': '', '-info': '', '-times': ''}, (err, response) => {
-        if (err) {
-            console.log(err);
-            message.channel.send(`Da ist leider was schiefgegangen. Bitte sei mir nicht böse ☹`);
-            return;
+    teamspeakClient.send('channellist', (err, channel) => {
+        channelStorage = {};
+        if (!Array.isArray(channel)) {
+            channel = [channel];
         }
 
-        if (!Array.isArray(response)) {
-            response = [response];
-        }
-
-        let formattedResponse = '';
-        response.forEach(current => {
-            // Filter out server query clients
-            if (current.client_type !== 1) {
-                formattedResponse += current.client_nickname;
-                if (current.client_away) {
-                    formattedResponse += ' (AFK)';
-                } else {
-                    const date = new Date(0,0,0,0,0,0,current.client_idle_time);
-                    if (date.getHours() > 0) {
-                        formattedResponse += ` (Untätig seit über ${date.getHours()} Stunden)`;
-                    }
-                }
-                formattedResponse += '\n';
-            }
+        channel.forEach(current => {
+            channelStorage[current.cid.toString()] = current;
         });
 
-        if (formattedResponse === '') {
-            formattedResponse = `Keiner online ☹`;
-        }
-        message.channel.send(formattedResponse, {code: true, split: true});
+        teamspeakClient.send('clientlist', {'-times': ''}, (err, clients) => {
+            if (!Array.isArray(clients)) {
+                clients = [clients];
+            }
+
+            let clientCount = 0;
+            clients.forEach(client => {
+                if (client.client_type === 0 && channelStorage[client.cid.toString()]) {
+                    channelStorage[client.cid.toString()].clients = channelStorage[client.cid.toString()].clients || [];
+                    channelStorage[client.cid.toString()].clients.push(client);
+                    clientCount++;
+                }
+            });
+
+            if (clientCount === 0) {
+                message.channel.send('Keiner online');
+                return;
+            }
+
+            if (clientCount === 1) {
+                message.channel.send('Es ist eine Person online');
+            } else {
+                message.channel.send(`Es sind ${clientCount} Personen online`);
+            }
+
+            let response = '';
+            for (let key in channelStorage) {
+                const data = channelStorage[key];
+                if (data.clients) {
+                    response += `${data.channel_name} (${data.clients.length}):\n`;
+                    data.clients.forEach(x => {
+                        const date = new Date(0, 0, 0, 0, 0, 0, x.client_idle_time);
+                        response += `\t${x.client_nickname}`;
+                        if (date.getHours() > 0) {
+                            response += ` (Untätig seit über ${date.getHours()} Stunde(n))`;
+                        }
+                        response += '\n';
+                    });
+                    response += '\n';
+                }
+            }
+
+            message.channel.send(response, {code: true});
+        });
     });
 }
 
