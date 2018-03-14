@@ -1,6 +1,6 @@
-const auth = require('./auth.json');
-const config = require('./config.json');
-const packageInfo = require('./package.json');
+const auth = require('../config/auth.json');
+const config = require('../config/config.json');
+const packageInfo = require('../package.json');
 const Discord = require('discord.js');
 const TeamspeakClient = require('node-teamspeak');
 
@@ -147,6 +147,7 @@ function setupTeamspeakQuery() {
         teamspeakClient.send('login', {client_login_name: auth.serverquery.username, client_login_password: auth.serverquery.password}, (err, response) => {
             if (err) {
                 console.log('failed to login into ts query', err);
+                return;
             }
 
             teamspeakClient.send('use', {sid: config.teamspeak.sid}, (err, response) => {
@@ -185,7 +186,7 @@ function setupTeamspeakQuery() {
      */
     teamspeakClient.on('cliententerview', response => {
         if (response.client_type === 0) {
-            broadcastMessage(`\`${response.client_nickname}\` ist gejoined`);
+            broadcastMessage(`\`${response.client_nickname}\` joined`);
             teamspeakClient.send('clientinfo', {clid: response.clid}, (err, clientData) => {
                 activeUsers[response.clid.toString()] = clientData.client_nickname;
                 if (isNewUser(clientData.client_created)) {
@@ -202,7 +203,7 @@ function setupTeamspeakQuery() {
         if (activeUsers[response.clid.toString()]) {
             const username = activeUsers[response.clid.toString()];
             delete activeUsers[response.clid.toString()];
-            broadcastMessage(`\`${username}\` ist geleaved`);
+            broadcastMessage(`\`${username}\` left`);
         }
     });
 
@@ -306,7 +307,7 @@ function sendClientList(message) {
                         const date = new Date(0, 0, 0, 0, 0, 0, x.client_idle_time);
                         response += `\t${x.client_nickname}`;
                         if (date.getHours() > 0) {
-                            response += ` (Untätig seit über ${date.getHours()} Stunde(n))`;
+                            response += ` (Idle: ${date.getHours()}h)`;
                         }
                         response += '\n';
                     });
