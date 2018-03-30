@@ -186,7 +186,7 @@ function setupTeamspeakQuery() {
      */
     teamspeakClient.on('cliententerview', response => {
         if (response.client_type === 0) {
-            broadcastMessage(`➡️ \`${response.client_nickname}\` joined`);
+            broadcastMessage(`➡️ **${response.client_nickname}** joined`);
             teamspeakClient.send('clientinfo', {clid: response.clid}, (err, clientData) => {
                 activeUsers[response.clid.toString()] = clientData.client_nickname;
                 if (isNewUser(clientData.client_created)) {
@@ -203,7 +203,7 @@ function setupTeamspeakQuery() {
         if (activeUsers[response.clid.toString()]) {
             const username = activeUsers[response.clid.toString()];
             delete activeUsers[response.clid.toString()];
-            broadcastMessage(`⬅️ \`${username}\` left`);
+            broadcastMessage(`⬅️ **${username}** left`);
         }
     });
 
@@ -321,6 +321,8 @@ function sendClientList(message) {
             }
 
             message.channel.send(response);
+
+            message.channel.send(`----------------------------------------`);
         });
     });
 }
