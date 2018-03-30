@@ -186,7 +186,7 @@ function setupTeamspeakQuery() {
      */
     teamspeakClient.on('cliententerview', response => {
         if (response.client_type === 0) {
-            broadcastMessage(`:arrow_right: \`${response.client_nickname}\` joined`);
+            broadcastMessage(`➡️ \`${response.client_nickname}\` joined`);
             teamspeakClient.send('clientinfo', {clid: response.clid}, (err, clientData) => {
                 activeUsers[response.clid.toString()] = clientData.client_nickname;
                 if (isNewUser(clientData.client_created)) {
@@ -203,7 +203,7 @@ function setupTeamspeakQuery() {
         if (activeUsers[response.clid.toString()]) {
             const username = activeUsers[response.clid.toString()];
             delete activeUsers[response.clid.toString()];
-            broadcastMessage(`:arrow_left: \`${username}\` left`);
+            broadcastMessage(`⬅️ \`${username}\` left`);
         }
     });
 
@@ -306,9 +306,9 @@ function sendClientList(message) {
                     data.clients.forEach(x => {
                         const date = new Date(0, 0, 0, 0, 0, 0, x.client_idle_time);
                         if (date.getHours() > 0) {
-                            response += `:small_orange_diamond: `;
+                            response += `🔸 `;
                         } else {
-                            response += `:small_blue_diamond: `;
+                            response += `🔹 `;
                         }
                         response += `\t${x.client_nickname}`;
                         if (date.getHours() > 0) {
