@@ -289,7 +289,7 @@ function sendClientList(message) {
             }
 
             let response  = '▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n';
-            response += `**Online:** ${clientCount}\n`;
+            response += `**Benutzer online:** ${clientCount}\n\n`;
 
             channel.forEach(channel => {
                 channel.clients = channel.clients || [];
