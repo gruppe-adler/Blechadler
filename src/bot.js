@@ -288,14 +288,8 @@ function sendClientList(message) {
                 return;
             }
 
-            let response = '';
-            if (clientCount === 1) {
-                response += 'Es ist eine Person online';
-            } else {
-                response += `Es sind ${clientCount} Personen online`;
-            }
-            response += '\n\n';
-            response += '▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n';
+            let response  = '▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n';
+            response += `**Online:** ${clientCount}\n`;
 
             channel.forEach(channel => {
                 channel.clients = channel.clients || [];
