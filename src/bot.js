@@ -288,7 +288,7 @@ function sendClientList(message) {
                 return;
             }
 
-            let response  = '▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n';
+            let response  = '▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n';
             response += `**Benutzer online:** ${clientCount}\n\n`;
 
             channel.forEach(channel => {
@@ -313,7 +313,7 @@ function sendClientList(message) {
             });
             // This is a weird discord newline behaviour workaround, just ignore it
             response = response.substring(0, response.length - 2);
-            response += '\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬';
+            response += '\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬';
             message.channel.send(response);
         });
     });
