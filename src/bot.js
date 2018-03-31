@@ -186,7 +186,7 @@ function setupTeamspeakQuery() {
      */
     teamspeakClient.on('cliententerview', response => {
         if (response.client_type === 0) {
-            broadcastMessage(`➡️ **${response.client_nickname}** joined`);
+            broadcastMessage(`➡️  **${response.client_nickname}** joined`);
             teamspeakClient.send('clientinfo', {clid: response.clid}, (err, clientData) => {
                 activeUsers[response.clid.toString()] = clientData.client_nickname;
                 if (isNewUser(clientData.client_created)) {
@@ -203,7 +203,7 @@ function setupTeamspeakQuery() {
         if (activeUsers[response.clid.toString()]) {
             const username = activeUsers[response.clid.toString()];
             delete activeUsers[response.clid.toString()];
-            broadcastMessage(`⬅️ **${username}** left`);
+            broadcastMessage(`⬅️  **${username}** left`);
         }
     });
 
@@ -264,14 +264,9 @@ function sendClientList(message) {
     }
 
     teamspeakClient.send('channellist', (err, channel) => {
-        channelStorage = {};
         if (!Array.isArray(channel)) {
             channel = [channel];
         }
-
-        channel.forEach(current => {
-            channelStorage[current.cid.toString()] = current;
-        });
 
         teamspeakClient.send('clientlist', {'-times': ''}, (err, clients) => {
             if (!Array.isArray(clients)) {
@@ -280,9 +275,10 @@ function sendClientList(message) {
 
             let clientCount = 0;
             clients.forEach(client => {
-                if (client.client_type === 0 && channelStorage[client.cid.toString()]) {
-                    channelStorage[client.cid.toString()].clients = channelStorage[client.cid.toString()].clients || [];
-                    channelStorage[client.cid.toString()].clients.push(client);
+                const targetChannel = channel.find(x => x.cid === client.cid);
+                if (client.client_type === 0 && targetChannel) {
+                    targetChannel.clients = targetChannel.clients || [];
+                    targetChannel.clients.push(client);
                     clientCount++;
                 }
             });
@@ -292,18 +288,20 @@ function sendClientList(message) {
                 return;
             }
 
-            if (clientCount === 1) {
-                message.channel.send('Es ist eine Person online');
-            } else {
-                message.channel.send(`Es sind ${clientCount} Personen online`);
-            }
-
             let response = '';
-            for (let key in channelStorage) {
-                const data = channelStorage[key];
-                if (data.clients) {
-                    response += `**${data.channel_name}** (${data.clients.length}):\n`;
-                    data.clients.forEach(x => {
+            if (clientCount === 1) {
+                response += 'Es ist eine Person online';
+            } else {
+                response += `Es sind ${clientCount} Personen online`;
+            }
+            response += '\n\n';
+            response += '▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n';
+
+            channel.forEach(channel => {
+                channel.clients = channel.clients || [];
+                if (channel.clients.length > 0) {
+                    response += `**${channel.channel_name}** (${channel.clients.length}):\n`;
+                    channel.clients.forEach(x => {
                         const date = new Date(0, 0, 0, 0, 0, 0, x.client_idle_time);
                         if (date.getHours() > 0) {
                             response += `🔸 `;
@@ -318,11 +316,11 @@ function sendClientList(message) {
                     });
                     response += '\n';
                 }
-            }
-
+            });
+            // This is a weird discord newline behaviour workaround, just ignore it
+            response = response.substring(0, response.length - 2);
+            response += '\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬';
             message.channel.send(response);
-
-            message.channel.send(`----------------------------------------`);
         });
     });
 }
