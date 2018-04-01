@@ -330,11 +330,6 @@ function sendClientList(message) {
 }
 
 function sendArmaServerStatus(message) {
-    if (config.teamspeak.noticesTargetChannel.indexOf(message.channel.name) === -1) {
-        message.channel.send(`Du bist leider im falschen Channel dafür ☹`);
-        return;
-    }
-
     config.armaServers.forEach(server => {
         server.type = 'arma3';
         Gamedig.query(server).then(state => {
