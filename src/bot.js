@@ -3,6 +3,7 @@ const config = require('../config/config.json');
 const packageInfo = require('../package.json');
 const Discord = require('discord.js');
 const TeamspeakClient = require('node-teamspeak');
+const Gamedig = require('gamedig');
 
 const client = new Discord.Client();
 let teamspeakClient;
@@ -60,6 +61,11 @@ function parseMention(message) {
             sendClientList(message);
             return;
         }
+
+        case 'server': {
+            sendArmaServerStatus(message);
+            return;
+        }
     }
 
     if (parsedMessage.endsWith('?')) {
@@ -92,6 +98,10 @@ function parseCommand(message) {
     switch (command) {
         case 'ts': {
             sendClientList(message);
+        } break;
+
+        case 'server': {
+            sendArmaServerStatus(message);
         } break;
     }
 }
@@ -315,6 +325,30 @@ function sendClientList(message) {
             response = response.substring(0, response.length - 2);
             response += '\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬';
             message.channel.send(response);
+        });
+    });
+}
+
+function sendArmaServerStatus(message) {
+    if (config.teamspeak.noticesTargetChannel.indexOf(message.channel.name) === -1) {
+        message.channel.send(`Du bist leider im falschen Channel dafür ☹`);
+        return;
+    }
+
+    config.armaServers.forEach(server => {
+        server.type = 'arma3';
+        Gamedig.query(server).then(state => {
+            let tmpMessage = '';
+            tmpMessage = `**Server:** ${state.name}\n`;
+            tmpMessage += `**Karte:** ${state.map} | **Mission:** ${state.raw.game} | **Spieler:** ${state.players.length}/${state.maxplayers}\n`;
+            state.players.forEach(player => {
+                tmpMessage += `\t- ${player.name}\n`;
+            });
+
+            message.channel.send(tmpMessage);
+
+        }).catch(error => {
+            message.channel.send(`Server ${server.host}:${server.port} ist offline.`);
         });
     });
 }
