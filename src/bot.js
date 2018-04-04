@@ -11,8 +11,6 @@ const targetChannelTs = [];
 const targetChannelArma = [];
 let serverDown = false;
 let playersOnServer = [];
-const serverReconnectionAttempts = 3;
-let reconnectionAttemptCount = 0;
 let latestServerState = null;
 
 /*
@@ -371,13 +369,11 @@ function monitorArmaServerStatus() {
             setTimeout(recurse, 10000);
 
             if (error) {
-                reconnectionAttemptCount++;
-                latestServerState = null;
-                if (!serverDown && serverReconnectionAttempts >= reconnectionAttemptCount) {
+                if(!serverDown) {
+                    latestServerState = null;
                     broadcastArmaMessage(`Server ${config.armaServer.host}:2302 ist offline.`);
                     serverDown = true;
                     playersOnServer = [];
-                    reconnectionAttemptCount = 0;
                 }
                 console.log(error);
                 return;
