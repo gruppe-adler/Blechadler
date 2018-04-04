@@ -11,6 +11,8 @@ const targetChannelTs = [];
 const targetChannelArma = [];
 let serverDown = false;
 let playersOnServer = [];
+const serverReconnectionAttempts = 3;
+let reconnectionAttemptCount = 0;
 
 /*
     Functions
@@ -341,14 +343,20 @@ function sendClientList(message) {
     });
 }
 
-async function queryArmaServerStatus(port = 2302) {
+function queryArmaServerStatus(port = 2302, cb) {
     config.armaServer.type = 'arma3';
     config.armaServer.port = port;
-    return await Gamedig.query(config.armaServer);
+    Gamedig.query(config.armaServer).then(state => cb(null, state)).catch(error => cb(error));
 }
 
 function sendArmaServerStatus(message) {
-    queryArmaServerStatus().then(state => {
+    queryArmaServerStatus(2302, (error, state) => {
+        if (error) {
+            message.channel.send(`Server ${server.host}:${server.port} ist offline.`);
+            console.log(error);
+            return;
+        }
+
         let tmpMessage = '';
         tmpMessage = `**Server:** ${state.name}\n`;
         tmpMessage += `**Karte:** ${state.map} | **Mission:** ${state.raw.game} | **Spieler:** ${state.players.length}/${state.maxplayers}\n`;
@@ -357,16 +365,26 @@ function sendArmaServerStatus(message) {
         });
 
         message.channel.send(tmpMessage);
-    }).catch(error => {
-        message.channel.send(`Server ${server.host}:${server.port} ist offline.`);
-        console.log(error);
     });
 }
 
 function monitorArmaServerStatus() {
-    async function recurse() {
-        try {
-            const status = await queryArmaServerStatus();
+    function recurse() {
+        queryArmaServerStatus(2302, (error, status) => {
+            setTimeout(recurse, 10000);
+
+            if (error) {
+                reconnectionAttemptCount++;
+                if (!serverDown && serverReconnectionAttempts >= reconnectionAttemptCount) {
+                    broadcastArmaMessage(`Server ${config.armaServer.host}:2302 ist offline.`);
+                    serverDown = true;
+                    playersOnServer = [];
+                    reconnectionAttemptCount = 0;
+                }
+                console.log(error);
+                return;
+            }
+
             if (serverDown) {
                 serverDown = false;
                 broadcastArmaMessage(`Server ${config.armaServer.host}:2302 ist online.`);
@@ -388,15 +406,7 @@ function monitorArmaServerStatus() {
                     broadcastArmaMessage(`${player} hat den Server 2302 verlassen`);
                 }
             });
-        } catch (e) {
-            if (!serverDown) {
-                broadcastArmaMessage(`Server ${config.armaServer.host}:2302 ist offline.`);
-                serverDown = true;
-                playersOnServer = [];
-            }
-            console.log(e);
-        }
-        setTimeout(recurse, 10000);
+        });
     }
     recurse();
 }
