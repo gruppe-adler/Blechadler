@@ -7,7 +7,10 @@ const Gamedig = require('gamedig');
 
 const client = new Discord.Client();
 let teamspeakClient;
-const targetChannel = [];
+const targetChannelTs = [];
+const targetChannelArma = [];
+let serverDown = false;
+let playersOnServer = [];
 
 /*
     Functions
@@ -114,14 +117,23 @@ function parseTargetChannel() {
         guild.channels.forEach((value, key) => {
             if (config.teamspeak.noticesTargetChannel.indexOf(value.name) > -1) {
                 const channel = new Discord.TextChannel(guild, value);
-                targetChannel.push(channel);
+                targetChannelTs.push(channel);
                 channel.send(`Ein wilder Blechadler ist erschienen ${getEmoji(guild, 'adlerkopp')}`);
-                console.log('found target channel', channel.id);
+                console.log('found ts target channel', channel.id);
+            }
+            if (config.armaServer.noticesTargetChannel.indexOf(value.name) > -1) {
+                const channel = new Discord.TextChannel(guild, value);
+                targetChannelArma.push(channel);
+                channel.send(`Ein wilder Blechadler ist erschienen ${getEmoji(guild, 'adlerkopp')}`);
+                console.log('found arma target channel', channel.id);
             }
         });
     });
-    if (targetChannel.length === 0) {
-        console.log('no target channel found');
+    if (targetChannelTs.length === 0) {
+        console.log('no ts target channel found');
+    }
+    if (targetChannelArma.length === 0) {
+        console.log('no arma target channel found');
     }
 }
 
@@ -196,11 +208,11 @@ function setupTeamspeakQuery() {
      */
     teamspeakClient.on('cliententerview', response => {
         if (response.client_type === 0) {
-            broadcastMessage(`➡️  **${response.client_nickname}** joined`);
+            broadcastTsMessage(`➡️  **${response.client_nickname}** joined`);
             teamspeakClient.send('clientinfo', {clid: response.clid}, (err, clientData) => {
                 activeUsers[response.clid.toString()] = clientData.client_nickname;
                 if (isNewUser(clientData.client_created)) {
-                    broadcastMessage(`@here \`${response.client_nickname}\` ist neu`);
+                    broadcastTsMessage(`@here \`${response.client_nickname}\` ist neu`);
                 }
             });
         }
@@ -213,7 +225,7 @@ function setupTeamspeakQuery() {
         if (activeUsers[response.clid.toString()]) {
             const username = activeUsers[response.clid.toString()];
             delete activeUsers[response.clid.toString()];
-            broadcastMessage(`⬅️  **${username}** left`);
+            broadcastTsMessage(`⬅️  **${username}** left`);
         }
     });
 
@@ -329,23 +341,64 @@ function sendClientList(message) {
     });
 }
 
+async function queryArmaServerStatus(port = 2302) {
+    config.armaServer.type = 'arma3';
+    config.armaServer.port = port;
+    return await Gamedig.query(config.armaServer);
+}
+
 function sendArmaServerStatus(message) {
-    config.armaServers.forEach(server => {
-        server.type = 'arma3';
-        Gamedig.query(server).then(state => {
-            let tmpMessage = '';
-            tmpMessage = `**Server:** ${state.name}\n`;
-            tmpMessage += `**Karte:** ${state.map} | **Mission:** ${state.raw.game} | **Spieler:** ${state.players.length}/${state.maxplayers}\n`;
-            state.players.forEach(player => {
-                tmpMessage += `\t- ${player.name}\n`;
+    queryArmaServerStatus().then(state => {
+        let tmpMessage = '';
+        tmpMessage = `**Server:** ${state.name}\n`;
+        tmpMessage += `**Karte:** ${state.map} | **Mission:** ${state.raw.game} | **Spieler:** ${state.players.length}/${state.maxplayers}\n`;
+        state.players.forEach(player => {
+            tmpMessage += `\t- ${player.name}\n`;
+        });
+
+        message.channel.send(tmpMessage);
+    }).catch(error => {
+        message.channel.send(`Server ${server.host}:${server.port} ist offline.`);
+        console.log(error);
+    });
+}
+
+function monitorArmaServerStatus() {
+    async function recurse() {
+        try {
+            const status = await queryArmaServerStatus();
+            if (serverDown) {
+                serverDown = false;
+                broadcastArmaMessage(`Server ${config.armaServer.host}:2302 ist online.`);
+            }
+            const playerNames = status.players.map(player => {
+                return player.name;
+            });
+            playerNames.forEach(name => {
+                if (playersOnServer.indexOf(name) === -1) {
+                    playersOnServer.push(name);
+                    broadcastArmaMessage(`${name} hat den Server 2302 betreten`);
+                }
             });
 
-            message.channel.send(tmpMessage);
-
-        }).catch(error => {
-            message.channel.send(`Server ${server.host}:${server.port} ist offline.`);
-        });
-    });
+            playersOnServer.forEach(player => {
+                const index = playerNames.indexOf(player);
+                if (index === -1) {
+                    playersOnServer.splice(index, 1);
+                    broadcastArmaMessage(`${player} hat den Server 2302 verlassen`);
+                }
+            });
+        } catch (e) {
+            if (!serverDown) {
+                broadcastArmaMessage(`Server ${config.armaServer.host}:2302 ist offline.`);
+                serverDown = true;
+                playersOnServer = [];
+            }
+            console.log(e);
+        }
+        setTimeout(recurse, 10000);
+    }
+    recurse();
 }
 
 /**
@@ -353,8 +406,19 @@ function sendArmaServerStatus(message) {
  * @param message
  * @param options
  */
-function broadcastMessage(message, options) {
-    targetChannel.forEach(channel => {
+function broadcastTsMessage(message, options) {
+    targetChannelTs.forEach(channel => {
+        channel.send(message, options);
+    });
+}
+
+/**
+ * Broadcasts a message to all channels arma notices should be posted in
+ * @param message
+ * @param options
+ */
+function broadcastArmaMessage(message, options) {
+    targetChannelArma.forEach(channel => {
         channel.send(message, options);
     });
 }
@@ -374,3 +438,4 @@ function getEmoji(guild, name) {
  */
 setupDiscordClient();
 setupTeamspeakQuery();
+monitorArmaServerStatus();

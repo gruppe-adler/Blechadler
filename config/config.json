@@ -5,12 +5,10 @@
     "sid": 2,
     "noticesTargetChannel": ["ts"]
   },
-  "armaServers": [
-    {
-      "host": "arma.gruppe-adler.de",
-      "port": 2302
-    }
-  ],
+  "armaServer": {
+    "host": "arma.gruppe-adler.de",
+    "noticesTargetChannel": ["bot"]
+  },
   "questioning": {
     "yesAnswers": [
       "Ich denke schon",
