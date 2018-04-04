@@ -13,6 +13,7 @@ let serverDown = false;
 let playersOnServer = [];
 const serverReconnectionAttempts = 3;
 let reconnectionAttemptCount = 0;
+let latestServerState = null;
 
 /*
     Functions
@@ -350,22 +351,18 @@ function queryArmaServerStatus(port = 2302, cb) {
 }
 
 function sendArmaServerStatus(message) {
-    queryArmaServerStatus(2302, (error, state) => {
-        if (error) {
-            message.channel.send(`Server ${server.host}:${server.port} ist offline.`);
-            console.log(error);
-            return;
-        }
-
+    if (latestServerState) {
         let tmpMessage = '';
-        tmpMessage = `**Server:** ${state.name}\n`;
-        tmpMessage += `**Karte:** ${state.map} | **Mission:** ${state.raw.game} | **Spieler:** ${state.players.length}/${state.maxplayers}\n`;
-        state.players.forEach(player => {
+        tmpMessage = `**Server:** ${latestServerState.name}\n`;
+        tmpMessage += `**Karte:** ${latestServerState.map} | **Mission:** ${latestServerState.raw.game} | **Spieler:** ${latestServerState.players.length}/${latestServerState.maxplayers}\n`;
+        latestServerState.players.forEach(player => {
             tmpMessage += `\t- ${player.name}\n`;
         });
 
         message.channel.send(tmpMessage);
-    });
+    } else {
+        message.channel.send(`Server arma.gruppe-adler.de:2302 ist offline.`);
+    }
 }
 
 function monitorArmaServerStatus() {
@@ -375,6 +372,7 @@ function monitorArmaServerStatus() {
 
             if (error) {
                 reconnectionAttemptCount++;
+                latestServerState = null;
                 if (!serverDown && serverReconnectionAttempts >= reconnectionAttemptCount) {
                     broadcastArmaMessage(`Server ${config.armaServer.host}:2302 ist offline.`);
                     serverDown = true;
@@ -384,6 +382,7 @@ function monitorArmaServerStatus() {
                 console.log(error);
                 return;
             }
+            latestServerState = status;
 
             if (serverDown) {
                 serverDown = false;
