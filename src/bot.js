@@ -7,8 +7,8 @@ const Gamedig = require('gamedig');
 
 const client = new Discord.Client();
 let teamspeakClient;
-const targetChannelTs = [];
-const targetChannelArma = [];
+let targetChannelTs = [];
+let targetChannelArma = [];
 let serverDown = false;
 let playersOnServer = [];
 let latestServerState = null;
@@ -114,6 +114,8 @@ function parseCommand(message) {
  * Searches in all guilds for channels teamspeak notices should be posted in
  */
 function parseTargetChannel() {
+    targetChannelArma = [];
+    targetChannelTs = [];
     client.guilds.forEach(guild => {
         guild.channels.forEach((value, key) => {
             if (config.teamspeak.noticesTargetChannel.indexOf(value.name) > -1) {
@@ -158,6 +160,9 @@ function hasBeenMentionend(message) {
  * Setups a teamspeak client, connects to the specified server query and reconnects if connection has been lost
  */
 function setupTeamspeakQuery() {
+    if (teamspeakClient) {
+        teamspeakClient.socket.destroy();
+    }
     teamspeakClient = new TeamspeakClient(config.teamspeak.serverip, config.teamspeak.queryport);
     const activeUsers = {};
 
