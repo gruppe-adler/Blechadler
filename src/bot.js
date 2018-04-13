@@ -448,4 +448,4 @@ function getEmoji(guild, name) {
  */
 setupDiscordClient();
 setupTeamspeakQuery();
-monitorArmaServerStatus();
+// monitorArmaServerStatus();
