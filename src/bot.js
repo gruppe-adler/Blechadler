@@ -160,7 +160,7 @@ function hasBeenMentionend(message) {
  * Setups a teamspeak client, connects to the specified server query and reconnects if connection has been lost
  */
 function setupTeamspeakQuery() {
-    if (teamspeakClient) {
+    if (teamspeakClient && teamspeakClient.socket) {
         teamspeakClient.socket.destroy();
     }
     teamspeakClient = new TeamspeakClient(config.teamspeak.serverip, config.teamspeak.queryport);
