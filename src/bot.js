@@ -4,6 +4,7 @@ const packageInfo = require('../package.json');
 const Discord = require('discord.js');
 const TeamspeakClient = require('node-teamspeak');
 const Gamedig = require('gamedig');
+const Sequelize = require('sequelize');
 
 const client = new Discord.Client();
 let teamspeakClient;
@@ -12,6 +13,33 @@ let targetChannelArma = [];
 let serverDown = false;
 let playersOnServer = [];
 let latestServerState = null;
+let stricheGlobal = {};
+
+const db = new Sequelize('', '', '', {
+    dialect: 'sqlite',
+    // http://docs.sequelizejs.com/manual/tutorial/querying.html#operators
+    operatorsAliases: false,
+
+    // SQLite only
+    storage: './db/database.sqlite'
+});
+
+db.authenticate().then(() => {
+    console.log('Connection has been established successfully.');
+}).catch(err => {
+    console.error('Unable to connect to the database:', err);
+});
+
+const Strich = db.define('strich', {
+    userid: {
+        type: Sequelize.STRING
+    },
+    reason: {
+        type: Sequelize.STRING,
+        allowNull: true
+    }
+});
+Strich.sync();
 
 /*
     Functions
@@ -41,24 +69,27 @@ function setupDiscordClient() {
  * @param message
  */
 function parseMention(message) {
+
+    //remove blechadler mention 
     const mentionEnd = message.content.indexOf('>') + 2;
     let parsedMessage = message.content.substr(mentionEnd, message.content.length - mentionEnd);
+    
     // Remove all spaces in the beginning
     while (parsedMessage.startsWith(' ')) {
         parsedMessage = parsedMessage.substr(0, 1);
     }
-
-    let response = '';
-
-    switch (parsedMessage) {
+    
+    switch (parsedMessage.toLowerCase()) {
         case 'über':
         case 'help':
         case '': {
-            response = `Ich bin der Blechadler, eine Kombination aus Adler, Blech und Strom ${getEmoji(message.guild, 'adlerkopp')}`;
+            message.channel.send(`Ich bin der Blechadler, eine Kombination aus Adler, Blech und Strom ${getEmoji(message.guild, 'adlerkopp')}`);
+            return;
         } break;
 
         case 'version': {
-            response = `${packageInfo.name} Version ${packageInfo.version}`;
+            message.channel.send(`${packageInfo.name} Version ${packageInfo.version}`);
+            return;
         } break;
 
         case 'ts': {
@@ -68,6 +99,10 @@ function parseMention(message) {
 
         case 'server': {
             sendArmaServerStatus(message);
+            return;
+        }
+        case 'striche': {
+            sendStricheList(message);
             return;
         }
     }
@@ -83,14 +118,23 @@ function parseMention(message) {
             source = config.questioning.otherAnswers;
         }
 
-        response = source[Math.floor(Math.random() * source.length)];
+        message.channel.send(source[Math.floor(Math.random() * source.length)]);
+        return;
     }
 
-    if (response === '') {
-        response = `Machst du mich extra von der Seite an? 💩`;
+
+    if (parsedMessage.toLowerCase().startsWith('strich')) {
+
+        message.mentions.users.forEach(user => {
+            if (user.id != client.user.id) {
+                addStrich(message, user);
+            }            
+        });
+
+        return;
     }
 
-    message.channel.send(response);
+    message.channel.send(`Machst du mich extra von der Seite an? 💩`);
 }
 
 /**
@@ -442,6 +486,55 @@ function broadcastArmaMessage(message, options) {
 function getEmoji(guild, name) {
     return guild.emojis.find('name', name);
 }
+
+async function sendStricheList(message) {
+    //TODO
+    let striche = await getStriche();
+    console.log('Damn', striche);
+
+    for (let id in striche) {
+        let user = `<@${id}>`;
+        let amount = striche[id];
+        message.channel.send(`${user} : ${amount}`);
+    }
+}
+
+async function getStriche(argUserid) {
+
+    //return striche for single user with reason 
+    if (argUserid) {
+        return await Strich.findAll({where:{"userid": argUserid}});
+    }
+
+    let distinctusers = await Strich.aggregate('userid', 'DISTINCT', { plain: false });
+    
+    let usersWithCount = {};
+    for (let index = 0; index < distinctusers.length; index++) {
+        let user = distinctusers[index];
+        let id = user.DISTINCT;
+        let count = await Strich.count({where: {"userid": id}});
+        console.l
+    
+        usersWithCount[id] = count;
+    }
+    
+    return usersWithCount;
+}
+
+function addStrich(message, user) {
+    //TODO
+    let id = user.id;
+    let reason = '';
+    Strich.create({'userid': id, 'reason': reason}).then(() => {
+        message.channel.send(`Ein Strich für ${user.toString()}!`);
+    }).catch(err => {
+        message.channel.send(`Ups da ist wohl etwas schief gelaufen.`);
+        console.log(err);
+    })
+}
+
+
+
 
 /*
     Init
