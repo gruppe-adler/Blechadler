@@ -5,21 +5,17 @@ const Discord = require('discord.js');
 const TeamspeakService = require('./services/TeamspeakService');
 const StricheService = require('./services/StricheService');
 const Utils = require('./services/Utils');
-const Gamedig = require('gamedig');
 
 const client = new Discord.Client();
 let tsService = null;
 let stricheService = null;
-/*
-    Functions
- */
+
 /**
  * Setups the discord client
  */
 function setupDiscordClient() {
     client.on('ready', () => {
         console.log(`Logged in as ${client.user.tag}!`);
-        //parseTargetChannel();
         tsService = new TeamspeakService(client);
         stricheService = new StricheService(client);
     }, (err) => console.log(err));
@@ -41,14 +37,13 @@ function setupDiscordClient() {
  */
 function parseMention(message) {
 
-    //remove blechadler mention 
-    const mentionEnd = message.content.indexOf('>') + 2;
-    let parsedMessage = message.content.substr(mentionEnd, message.content.length - mentionEnd);
-    
-    // Remove all spaces in the beginning
-    while (parsedMessage.startsWith(' ')) {
-        parsedMessage = parsedMessage.substr(0, 1);
-    }
+    // Remove blechadler mention and trailing spaces in the beginning 
+    let parsedMessage = message.content.replace(
+        new RegExp(`<@!?${client.user.id}>[ ]*`, 'i'),
+        ''
+    );
+
+    let userMentionPattern = Discord.MessageMentions.USERS_PATTERN.source;
     
     switch (parsedMessage.toLowerCase()) {
         case 'über':
@@ -56,26 +51,53 @@ function parseMention(message) {
         case '': {
             message.channel.send(`Ich bin der Blechadler, eine Kombination aus Adler, Blech und Strom ${Utils.getEmoji(message.guild, 'adlerkopp')}`);
             return;
-        } break;
+        };
 
         case 'version': {
             message.channel.send(`${packageInfo.name} Version ${packageInfo.version}`);
             return;
-        } break;
+        };
 
         case 'ts': {
             tsService.sendClientList(message);
             return;
         }
 
-        case 'server': {
-            sendArmaServerStatus(message);
-            return;
-        }
+        // case 'server': {
+        //     sendArmaServerStatus(message);
+        //     return;
+        // }
         case 'striche': {
             stricheService.sendStricheOverview(message);
             return;
         }
+    }
+
+    // message matches 'strich <mention>.*'
+    if (parsedMessage.match(new RegExp(`^strich ${userMentionPattern}.*$`,'i'))) {
+
+        // find user from first mention
+        // we need this id because we want to get the user, which was mention directly after the 'strich '
+        let userid = parsedMessage.replace(/^strich <@!?/i, '').replace(/>.*$/i, '');
+        let user = message.mentions.users.find(user => (user.id == userid));
+
+        let reason = parsedMessage.replace(
+            new RegExp(`strich ${userMentionPattern}[ ]*`,'i'),
+            ''
+        );
+
+        stricheService.addStrich(message, user, reason);
+
+        return;
+    }
+
+    // message matches 'striche <mention>'
+    if (parsedMessage.match(new RegExp(`^striche ${userMentionPattern}$`,'i'))) {
+
+        let user = message.mentions.users.find(user => (user.id != client.user.id));
+        stricheService.sendUserStriche(message, user);
+
+        return;
     }
 
     if (parsedMessage.endsWith('?')) {
@@ -93,27 +115,6 @@ function parseMention(message) {
         return;
     }
 
-
-    if (parsedMessage.toLowerCase().startsWith('strich ')) {
-
-        let user = message.mentions.users.find(user => (user.id != client.user.id));
-        let reason = parsedMessage.replace(`strich <@${user.id}>`, '');
-        while (reason.startsWith(' ')) {
-            reason = reason.substr(0, 1);
-        }
-
-        stricheService.addStrich(message, user, reason);
-
-        return;
-    }
-
-    if (parsedMessage.toLowerCase().startsWith('striche ')) {
-        let user = message.mentions.users.find(user => (user.id != client.user.id));
-        stricheService.sendUserStriche(message, user);
-
-        return;
-    }
-
     message.channel.send(`Machst du mich extra von der Seite an? 💩`);
 }
 
@@ -128,9 +129,9 @@ function parseCommand(message) {
             tsService.sendClientList(message);
         } break;
 
-        case 'server': {
-            sendArmaServerStatus(message);
-        } break;
+        // case 'server': {
+        //     sendArmaServerStatus(message);
+        // } break;
     }
 }
 
@@ -145,14 +146,11 @@ function hasBeenMentionend(message) {
         return false;
     }
 
-    const result = message.mentions.members.find((value, key) => {
-        return value.user.id === client.user.id;
-    });
-    return result !== undefined && result !== null;
+    //only counts as mentioned if the message starts with the blechadler mentions
+    return (message.content.match(new RegExp(`^<@!?${client.user.id}>`,'i')));
 }
 
 /*
     Init
  */
 setupDiscordClient();
-// monitorArmaServerStatus();
