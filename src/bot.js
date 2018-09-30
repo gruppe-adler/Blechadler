@@ -4,11 +4,13 @@ const packageInfo = require('../package.json');
 const Discord = require('discord.js');
 const TeamspeakService = require('./services/TeamspeakService');
 const StricheService = require('./services/StricheService');
+const ReminderService = require('./services/ReminderService');
 const Utils = require('./services/Utils');
 
 const client = new Discord.Client();
 let tsService = null;
 let stricheService = null;
+let reminderService = null;
 
 /**
  * Setups the discord client
@@ -18,6 +20,7 @@ function setupDiscordClient() {
         console.log(`Logged in as ${client.user.tag}!`);
         tsService = new TeamspeakService(client);
         stricheService = new StricheService(client);
+        reminderService = new ReminderService(client);
     }, (err) => console.log(err));
 
     client.on('message', (message) => {
@@ -100,7 +103,7 @@ function parseMention(message) {
         return;
     }
 
-    //message matches 'pick .+ .+' so pick followed by minimum two options
+    // message matches 'pick .+ .+' so pick followed by minimum two options
     if (parsedMessage.match(new RegExp(`pick .+ .+`))) {
         var options = parsedMessage.replace('pick ', '').split(' ');
 
@@ -113,6 +116,47 @@ function parseMention(message) {
 
         message.channel.send(`<@${message.author.id}> Also ich wär für **${pick}**`);
     
+        return;
+    }
+
+    // message matches 'reminder(er)? <mention>'
+    if (parsedMessage.match(new RegExp(`^remind(er)? ${userMentionPattern}$`,'i'))) {
+
+        let user = message.mentions.users.find(user => (user.id != client.user.id));
+        reminderService.listReminders(message, user);
+
+        return;
+    }
+
+    // message matches 'reminder(er)? delete 1'
+    if (parsedMessage.match(new RegExp(`^remind(er)? (delete|remove) [0-9]+$`,'i'))) {
+
+        let reminderId = parsedMessage.replace(/^remind(er)? (delette|remove) /i, '');
+
+        reminderService.deleteReminder(message, reminderId);
+
+        return;
+    }
+
+    if (parsedMessage.match(new RegExp(`^remind(er)? .+ .+$`))) {
+        
+        let arr = parsedMessage.replace(/^remind(er)? /i, '').split(' ');
+        
+        let userid = arr[0].replace(/^<@!?/i, '').replace(/>$/i, '');
+        // make author the reminded user if first part of message doesn't match userMentionPattern
+        if (! arr[0].match(new RegExp(userMentionPattern, 'i'))) {
+            userid = message.author.id;
+        }
+
+        // todo
+        let date = new Date();
+        date = new Date(date.getTime() + 10 * 60000 * Math.random());
+        date.setMilliseconds(0);
+        date.setSeconds(0);
+
+        let title = parsedMessage.replace(`remind ${arr[0]}`, '');
+
+        reminderService.addReminder(userid, date, title, message.author.id, message);
         return;
     }
 
