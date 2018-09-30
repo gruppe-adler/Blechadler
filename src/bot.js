@@ -146,7 +146,7 @@ function hasBeenMentionend(message) {
         return false;
     }
 
-    //only counts as mentioned if the message starts with the blechadler mentions
+    //only counts as mentioned if the message starts with the blechadler mention
     return (message.content.match(new RegExp(`^<@!?${client.user.id}>`,'i')));
 }
 

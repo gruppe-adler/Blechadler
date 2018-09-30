@@ -8,6 +8,9 @@ module.exports = class StricheService {
         this.setupDatabase();
     }
 
+    /**
+     * Set up the database connection
+     */
     setupDatabase() {
         this.db = new Sequelize('', '', '', {
             dialect: 'sqlite',
@@ -43,10 +46,14 @@ module.exports = class StricheService {
         this.cacheUsers();
     }
 
-    
+    /**
+     * Sends overview of the striche of all users
+     * @param {Discord.Message} message
+     */
     async sendStricheOverview(message) {
-        let striche = await this.getStriche();
+        let striche = await this.getAllStriche();
 
+        //if there is no user with Striche
         if (Object.getOwnPropertyNames(striche).length === 0) {
             message.channel.send(`Sieht so aus als ob hier noch keiner Striche verteilt hat ${Utils.getEmoji(message.guild, 'zade')}`);
             return;
@@ -62,9 +69,17 @@ module.exports = class StricheService {
         message.channel.send(text);
     }
 
+    /**
+     * Sends overview of the striche with the stated reason of a single user 
+     * @param {Discord.Message} message
+     * @param {Discord.User} user
+     */
     async sendUserStriche(message, user) {
+
+        //get the users Striche
         let striche = await this.getUserStriche(user.id);
 
+        //give first Strich if user has none already
         if (striche.length === 0) {
             message.channel.send(`Sieht so aus als ob ${user.username} noch keine Striche hat. ${Utils.getEmoji(message.guild, 'zade')}`);
 
@@ -80,13 +95,20 @@ module.exports = class StricheService {
 
             stricheMessage = stricheMessage.concat(`Strich von ${executioner} _"${strich.reason}"_ (${strich.createdAt.toLocaleString()})\n`);            
         }
-        message.channel.send(stricheMessage);
 
+        message.channel.send(stricheMessage);
     }
 
-    async getStriche() {
+    /**
+     * Returns the amount of Striche each user has
+     * @returns {Object}
+     */
+    async getAllStriche() {
+
+        // get all users which have Striche
         let distinctusers = await this.db.Strich.aggregate('userid', 'DISTINCT', { plain: false });
         
+        // get the amount of Striche for every user
         let usersWithCount = {};
         for (let index = 0; index < distinctusers.length; index++) {
             let user = distinctusers[index];
@@ -99,13 +121,24 @@ module.exports = class StricheService {
         return usersWithCount;
     }
 
+    /**
+     * Returns all Striche from a single user
+     * @param {String} userId
+     * @returns {Object}
+     */
     async getUserStriche(userId) {
         return await this.db.Strich.findAll({where:{"userid": userId}});
     }
 
+    /**
+     * Add a strich to a user
+     * @param {Discord.Message} message
+     * @param {Discord.User} userId
+     * @param {String} reason
+     */
     addStrich(message, user, reason) {
 
-        if (reason == '') {
+        if (!reason || reason == '') {
             reason = 'weil Baum'
         }
 
@@ -118,11 +151,15 @@ module.exports = class StricheService {
             console.log(err);
         });
 
-        //fetch the users from discord to make sure they are cached
+        // fetch the users from discord to make sure they are cached
         this.discordClient.fetchUser(id, true);
         this.discordClient.fetchUser(executioner, true);
     }
 
+    /**
+     * Called from constructor. 
+     * Fetches all user from Discord, which are referenced in striche-DB to cache them to allow faster answers from blechadler
+     */
     cacheUsers() {
         this.db.Strich.findAll().then(striche => {
             striche.forEach(strich =>{

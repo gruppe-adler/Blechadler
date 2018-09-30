@@ -1,4 +1,4 @@
-const TeamspeakClient = require('node-teamspeak');
+const Gamedig = require('gamedig');
 const config = require('../../config/config.json');
 const auth = require('../../config/auth.json');
 const Discord = require('discord.js');
