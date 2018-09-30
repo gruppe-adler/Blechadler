@@ -39,15 +39,22 @@ module.exports = class StricheService {
             }
         });
         this.db.Strich.sync();
+
+        this.cacheUsers();
     }
 
     
     async sendStricheOverview(message) {
         let striche = await this.getStriche();
 
+        if (Object.getOwnPropertyNames(striche).length === 0) {
+            message.channel.send(`Sieht so aus als ob hier noch keiner Striche verteilt hat ${Utils.getEmoji(message.guild, 'zade')}`);
+            return;
+        }
+
         let text = `**__Striche:__**\n`;
         for (let id in striche) {
-            let user = `<@${id}>`;
+            let user = (await this.discordClient.fetchUser(id)).username;
             let amount = striche[id];
 
             text = text.concat(`${user} : ${amount}\n`);
@@ -56,7 +63,7 @@ module.exports = class StricheService {
     }
 
     async sendUserStriche(message, user) {
-        let striche = await this.getStriche(user.id);
+        let striche = await this.getUserStriche(user.id);
 
         if (striche.length === 0) {
             message.channel.send(`Sieht so aus als ob ${user.username} noch keine Striche hat. ${Utils.getEmoji(message.guild, 'zade')}`);
@@ -69,20 +76,15 @@ module.exports = class StricheService {
         let stricheMessage = `**__Striche von ${user.username}:__**\n`;
         for (let i = 0; i < striche.length; i++) {
             let strich = striche[i].get();
+            let executioner = (await this.discordClient.fetchUser(strich.executionerid)).username;
 
-            stricheMessage = stricheMessage.concat(`Strich von <@${strich.executionerid}> _"${strich.reason}"_ (${strich.createdAt.toLocaleString()})\n`);            
+            stricheMessage = stricheMessage.concat(`Strich von ${executioner} _"${strich.reason}"_ (${strich.createdAt.toLocaleString()})\n`);            
         }
         message.channel.send(stricheMessage);
 
     }
 
-    async getStriche(argUserid) {
-
-        //return striche for single user with reason 
-        if (argUserid) {
-            return await this.db.Strich.findAll({where:{"userid": argUserid}});
-        }
-
+    async getStriche() {
         let distinctusers = await this.db.Strich.aggregate('userid', 'DISTINCT', { plain: false });
         
         let usersWithCount = {};
@@ -95,6 +97,10 @@ module.exports = class StricheService {
         }
         
         return usersWithCount;
+    }
+
+    async getUserStriche(userId) {
+        return await this.db.Strich.findAll({where:{"userid": userId}});
     }
 
     addStrich(message, user, reason) {
@@ -110,7 +116,20 @@ module.exports = class StricheService {
         }).catch(err => {
             message.channel.send(`Ups da ist wohl etwas schief gelaufen.`);
             console.log(err);
-        })
+        });
+
+        //fetch the users from discord to make sure they are cached
+        this.discordClient.fetchUser(id, true);
+        this.discordClient.fetchUser(executioner, true);
+    }
+
+    cacheUsers() {
+        this.db.Strich.findAll().then(striche => {
+            striche.forEach(strich =>{
+                this.discordClient.fetchUser(strich.userid, true);
+                this.discordClient.fetchUser(strich.executionerid, true);
+            });
+        });
     }
 
 
