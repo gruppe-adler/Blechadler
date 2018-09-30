@@ -1,3 +1,4 @@
 config/auth.json
 .idea/
 node_modules/
+db/database.sqlite
