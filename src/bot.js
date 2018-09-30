@@ -100,6 +100,22 @@ function parseMention(message) {
         return;
     }
 
+    //message matches 'pick .+ .+' so pick followed by minimum two options
+    if (parsedMessage.match(new RegExp(`pick .+ .+`))) {
+        var options = parsedMessage.replace('pick ', '').split(' ');
+
+        let pick = options[Math.floor(Math.random() * options.length)];
+
+        //if there is an a-10 pick the a-10 :P
+        if (parsedMessage.match(/a\-?10/i)) {
+            pick = options.find(option => option.match(/a\-?10/i));
+        }
+
+        message.channel.send(`<@${message.author.id}> Also ich wär für **${pick}**`);
+    
+        return;
+    }
+
     if (parsedMessage.endsWith('?')) {
         const random = Math.random();
         let source;
