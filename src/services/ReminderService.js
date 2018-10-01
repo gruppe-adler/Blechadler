@@ -47,7 +47,12 @@ module.exports = class StricheService {
         this.db.Reminder.sync();
     }
 
+    /**
+     * Reset the timeout to the next reminder. A reminder is sent upon timeout completion
+     */
     async setTimeoutToNextReminder() {
+
+        // find one reminder. Oder by date, so we get the next reminder
         let nextremider = await this.db.Reminder.findOne({order:  Sequelize.col('date')});
 
         // exit if no reminder left        
@@ -55,29 +60,35 @@ module.exports = class StricheService {
             return;
         }
 
+        // calculate time in miliseconds between now an the dateTime of the reminder
         let date = nextremider.date;
-
-        let time = date.getTime() - (new Date()).getTime();
+        let timeToReminder = date.getTime() - (new Date()).getTime();
 
         // delete reminder if it is in the past and find a new one again
         // we accept reminders which are up to 10 seconds in the past, because multiple reminders could be at the same date
-        if (time < -10000 ) {
+        if (timeToReminder < -10000 ) {
             await nextremider.destroy();
 
             this.setTimeoutToNextReminder();
             return;
         }
         
+        // delete timeout if there is one already
         if (this.timeout) {
             clearTimeout(this.timeout);
         }
 
         
-        this.timeout = setTimeout(this.sendReminder.bind(this), time, nextremider);
+        this.timeout = setTimeout(this.sendReminder.bind(this), timeToReminder, nextremider);
     }
 
+    /**
+     * Triggered by timeout. Sends a reminder personal message to recipient
+     * @param {Object} reminder
+     */
     async sendReminder(reminder) {
 
+        // fetch user from discord
         let user = await this.discordClient.fetchUser(reminder.userid);
 
         user.send(`<@${reminder.author}> wanted me to remind you about _${reminder.title}_`);
@@ -85,13 +96,24 @@ module.exports = class StricheService {
         // delete the reminder from the db
         await reminder.destroy();
         
-        // 
+        // reset timeout
         this.setTimeoutToNextReminder();
     }
 
+    /**
+     * Add a reminder 
+     * @param {Discord.User} user user
+     * @param {Date} date reminder date
+     * @param {String} title reminder title
+     * @param {Discord.User} user user
+     * @param {Discord.Message} message 
+     */
     async addReminder(user, date, title, author, message) {
+
         this.db.Reminder.create({'date': date, 'title': title, 'userid': user, 'author': author}).then((() => {
             message.channel.send(`Ok <@${author}>. Ich werde <@${user}> um ${date.toLocaleString()} an _${title}_ erinnern`);
+
+            // reset timeout
             this.setTimeoutToNextReminder();
         }).bind(this)).catch(err => {
             message.channel.send(`Ups da ist wohl etwas schief gelaufen.`);
@@ -99,14 +121,24 @@ module.exports = class StricheService {
         });
     }
 
+    
+    /**
+     * List all reminders for given user. 
+     * @param {Discord.Message} message 
+     * @param {Discord.User} user user
+     */
     async listReminders(message, user) {
+
+        // fetch all reminders from database
         let reminders = await this.db.Reminder.findAll({where: {'userid': user.id}, order:  Sequelize.col('date')});
 
+        // if user has no reminders
         if (reminders.length === 0) {
             message.channel.send(`${user.username} hat keine laufenden Reminder.`);
             return;
         }
 
+        // build message
         let reminderMessage = `**__Reminder von ${user.username}:__**\n`;
         for (let i = 0; i < reminders.length; i++) {
             let reminder = reminders[i]
@@ -116,18 +148,32 @@ module.exports = class StricheService {
         message.channel.send(reminderMessage);
     }
 
+    /**
+     * Deletes reminder with given id
+     * @param {Discord.Message} message 
+     * @param {String | Number} id reminder id
+     */
     async deleteReminder(message, id) {
         let reminder = await this.db.Reminder.findOne({where: {'id': id}});
 
+        // check wether reminder exists
         if (!reminder) {
             message.channel.send(`Ich habe leider keinen Reminder mit der ID ${id} gefunden.`);
+            return;
+        }
+
+        // make sure user who is attemting to delete reminder is authorized (either reminder author / reminded person)
+        if (reminder.userid != message.author.id && reminder.author != message.author.id) {
+            message.channel.send(`Halt Stopp. Das bleibt alles so wie es ist!!1 Du darfst den Reminder mit der ID ${id} ned anfassen.`);
             return;
         }
         
         message.channel.send(`Ok ich habe den Reminder _"${reminder.title}"_ für <@${reminder.userid}> gelöscht.`);
 
+        // delete reminder from database
         await reminder.destroy();
 
+        // reset timeout
         this.setTimeoutToNextReminder();
     }
 }
