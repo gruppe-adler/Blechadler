@@ -131,32 +131,61 @@ function parseMention(message) {
     // message matches 'reminder(er)? delete 1'
     if (parsedMessage.match(new RegExp(`^remind(er)? (delete|remove) [0-9]+$`,'i'))) {
 
-        let reminderId = parsedMessage.replace(/^remind(er)? (delette|remove) /i, '');
+        let reminderId = parsedMessage.replace(/^remind(er)? (delete|remove) /i, '');
 
         reminderService.deleteReminder(message, reminderId);
 
         return;
     }
 
-    if (parsedMessage.match(new RegExp(`^remind(er)? .+ .+$`))) {
-        
-        let arr = parsedMessage.replace(/^remind(er)? /i, '').split(' ');
-        
-        let userid = arr[0].replace(/^<@!?/i, '').replace(/>$/i, '');
-        // make author the reminded user if first part of message doesn't match userMentionPattern
-        if (! arr[0].match(new RegExp(userMentionPattern, 'i'))) {
-            userid = message.author.id;
+    if (parsedMessage.match(new RegExp(`^remind(er)? .+$`, 'i'))) {
+
+        let authorid = message.author.id;
+        let userid = authorid;
+        let date = new Date();
+
+        // remove the remind(er) from the beginning
+        let tempText = parsedMessage.replace(/^remind(er)? /i, '');
+
+        // if there is a mention parse it out
+        if (tempText.match(new RegExp(`^${userMentionPattern} .*`, 'i'))) {
+            userid = tempText.replace(/^<@!?/i, '').replace(/>.*$/i, '');
+            
+            // remove mention
+            tempText = tempText.replace(new RegExp(`^${userMentionPattern}[ ]*`, 'i'), '');
         }
 
-        // todo
-        let date = new Date();
-        date = new Date(date.getTime() + 10 * 60000 * Math.random());
-        date.setMilliseconds(0);
-        date.setSeconds(0);
+        if (tempText.match(/^\d{4}\-\d{2}\-\d{2} \d{2}\:\d{2} .*$/i)) {
+            let match = tempText.match(/^\d{4}\-\d{2}\-\d{2} \d{2}\:\d{2}/i)[0];
+            date = new Date(match);
 
-        let title = parsedMessage.replace(`remind ${arr[0]}`, '');
+            // remove date and time
+            tempText = tempText.replace(/^\d{4}\-\d{2}\-\d{2} \d{2}\:\d{2}[ ]*/i, '');
 
-        reminderService.addReminder(userid, date, title, message.author.id, message);
+        } else if(tempText.match(/^\d{2}\:\d{2} .*$/i)) {
+            let dateString = date.toDateString();
+            let match = tempText.match(/^\d{2}\:\d{2}/i)[0];
+            
+            date = new Date(dateString.concat(' ').concat(match));
+
+            // remove time
+            tempText = tempText.replace(/^\d{2}\:\d{2}[ ]*/i, '');
+
+        } else {
+            message.channel.send(`<@!${authorid}> Ich kann das nicht lesen. Bitte folgendes Format: \`reminder [@mention] [YYYY-MM-DD] HH:MM <Titel>\``);
+            return;
+        }
+
+
+        if (date.getTime() < (new Date()).getTime()) {
+            message.channel.send(`Ehh <@!${authorid}> du Held. Ich kann dich schlecht an einem vergangenen Zeitpunkt erinnern. Seh ich wie Marty McFly aus oder was?`);
+            return;
+        }
+
+        // the rest of the text is the title
+        let title = tempText;
+
+        reminderService.addReminder(userid, date, title, authorid, message);
         return;
     }
 

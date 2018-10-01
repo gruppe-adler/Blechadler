@@ -64,6 +64,8 @@ module.exports = class StricheService {
         let date = nextremider.date;
         let timeToReminder = date.getTime() - (new Date()).getTime();
 
+        //TODO: Reminder can be too big
+
         // delete reminder if it is in the past and find a new one again
         // we accept reminders which are up to 10 seconds in the past, because multiple reminders could be at the same date
         if (timeToReminder < -10000 ) {
@@ -111,7 +113,11 @@ module.exports = class StricheService {
     async addReminder(user, date, title, author, message) {
 
         this.db.Reminder.create({'date': date, 'title': title, 'userid': user, 'author': author}).then((() => {
-            message.channel.send(`Ok <@${author}>. Ich werde <@${user}> um ${date.toLocaleString()} an _${title}_ erinnern`);
+            if (user==author) {
+                message.channel.send(`Ok <@${author}>. Ich werde dich um ${date.toLocaleString()} an _${title}_ erinnern`);
+            } else {
+                message.channel.send(`Ok <@${author}>. Ich werde <@${user}> um ${date.toLocaleString()} an _${title}_ erinnern`);
+            }
 
             // reset timeout
             this.setTimeoutToNextReminder();
