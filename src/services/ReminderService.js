@@ -69,17 +69,27 @@ module.exports = class StricheService {
         // delete reminder if it is in the past and find a new one again
         // we accept reminders which are up to 10 seconds in the past, because multiple reminders could be at the same date
         if (timeToReminder < -10000 ) {
+            // delete reminder of the past
             await nextremider.destroy();
 
+            // try again
             this.setTimeoutToNextReminder();
             return;
         }
+
         
         // delete timeout if there is one already
         if (this.timeout) {
             clearTimeout(this.timeout);
         }
+        
 
+        // setTimeout uses a 32 bit integer to store the timeout. If the time to the next reminder is 
+        // too big -> Set the timeout to the max value and then try to set the timeout again.
+        if (timeToReminder >= Math.pow(2,31)) {
+            this.timeout = setTimeout(this.setTimeoutToNextReminder.bind(this), Math.pow(2,31) - 1);
+            return;
+        }
         
         this.timeout = setTimeout(this.sendReminder.bind(this), timeToReminder, nextremider);
     }
