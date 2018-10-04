@@ -59,14 +59,24 @@ module.exports = class StricheService {
             return;
         }
 
-        let text = `**__Striche:__**\n`;
+        let fields = [];
         for (let id in striche) {
             let user = (await this.discordClient.fetchUser(id)).username;
             let amount = striche[id];
 
-            text = text.concat(`${user} : ${amount}\n`);
+            fields.push({
+                "name": user,
+                "value": `${amount} ${amount > 1 ? 'Striche' : 'Strich'}`
+            })
         }
-        message.channel.send(text);
+
+        message.channel.send(`<@${message.author.id}> hier hast du eine Übersicht der aller Striche:`, {
+            "embed": {
+              "color": 13733151,
+              "fields": fields
+            }
+        });
+        //message.channel.send(text);
     }
 
     /**
@@ -88,15 +98,26 @@ module.exports = class StricheService {
             return;
         }
 
-        let stricheMessage = `**__Striche von ${user.username}:__**\n`;
+        let fields = [];
         for (let i = 0; i < striche.length; i++) {
             let strich = striche[i].get();
-            let executioner = (await this.discordClient.fetchUser(strich.executionerid)).username;
-
-            stricheMessage = stricheMessage.concat(`Strich von ${executioner} _"${strich.reason}"_ (${strich.createdAt.toLocaleString()})\n`);            
+            
+            fields.push({
+                "name": strich.reason,
+                "value": `<@${strich.executionerid}> _(${strich.createdAt.toLocaleString()})_`
+            });
         }
 
-        message.channel.send(stricheMessage);
+        message.channel.send(`<@${message.author.id}> ${user.username} hat ${striche.length} Striche:`, {
+            "embed": {
+              "color": 13733151,
+              "author": {
+                "name": user.username,
+                "icon_url": user.avatarURL
+              },
+              "fields": fields
+            }
+        });
     }
 
     /**

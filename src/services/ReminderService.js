@@ -136,8 +136,7 @@ module.exports = class StricheService {
             console.log(err);
         });
     }
-
-    
+   
     /**
      * List all reminders for given user. 
      * @param {Discord.Message} message 
@@ -154,13 +153,26 @@ module.exports = class StricheService {
             return;
         }
 
-        // build message
-        let reminderMessage = `**__Reminder von ${user.username}:__**\n`;
+        let fields = [];
         for (let i = 0; i < reminders.length; i++) {
-            let reminder = reminders[i]
-            reminderMessage = reminderMessage.concat(`${reminder.date.toLocaleString()} (\`${reminder.id}\`):_${reminder.title}_\n`);
+            let reminder = reminders[i];
+
+            fields.push({
+                "name": reminder.title,
+                "value": `_${reminder.date.toLocaleString()}_ (\`${reminder.id}\`)`
+            })
         }
 
+        message.channel.send(`<@${message.author.id}> ${user.username} hat ${reminders.length} laufende Reminder:`, {
+            "embed": {
+              "color": 13733151,
+              "author": {
+                "name": user.username,
+                "icon_url": user.avatarURL
+              },
+              "fields": fields
+            }
+        });
         message.channel.send(reminderMessage);
     }
 
