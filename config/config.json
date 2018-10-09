@@ -5,6 +5,9 @@
     "sid": 2,
     "noticesTargetChannel": ["ts"]
   },
+  "channel": {
+    "category": "offtopic"
+  },
   "armaServer": {
     "host": "arma.gruppe-adler.de",
     "noticesTargetChannel": ["bot"]
@@ -32,5 +35,5 @@
     ]
   },
   "commandSymbol": "!",
-  "commands": ["help", "pick", "reminder", "strich", "striche", "teamspeak", "version"]
+  "commands": ["channels", "help", "pick", "reminder", "strich", "striche", "teamspeak", "version"]
 }

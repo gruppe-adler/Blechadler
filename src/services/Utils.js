@@ -7,7 +7,6 @@ module.exports = class Utils {
      * @returns {Emoji}
      */
     static getEmoji(guild, name) {
-        return guild.emojis.find('name', name);
-    }
-    
+        return guild.emojis.find('name', name) || `:${name}:`;
+    }    
 }
