@@ -31,5 +31,6 @@
       "Ich mag dich nicht"
     ]
   },
-  "commandSymbol": "!"
+  "commandSymbol": "!",
+  "commands": ["help", "pick", "reminder", "strich", "striche", "teamspeak", "version"]
 }

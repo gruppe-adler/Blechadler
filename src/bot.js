@@ -67,13 +67,16 @@ function parseMention(message) {
 
     let command = args.shift().toLowerCase();
     command = commandAliases[command] || command;
-    
-    try {
-        let commandFile = require(`./commands/${command}.js`);
-        commandFile(client, message, args, services);
-    } catch (err) {
+
+    if (config.commands.indexOf(command) == -1) {
+
+        //TODO: Help
         message.channel.send(`Machst du mich extra von der Seite an? ${Utils.getEmoji(message.guild, 'slade')}`);
+        return;
     }
+    
+    // execute command
+    require(`./commands/${command}.js`)(client, message, args, services);
 }
 
 /**
