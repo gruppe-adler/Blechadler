@@ -1,5 +1,6 @@
 const Sequelize = require('sequelize');
 const Utils = require('./Utils');
+const Discord = require('discord.js');
 
 module.exports = class StricheService {
 
@@ -70,7 +71,7 @@ module.exports = class StricheService {
             })
         }
 
-        message.channel.send(`<@${message.author.id}> hier hast du eine Übersicht der aller Striche:`, {
+        message.channel.send(`${message.author} hier hast du eine Übersicht der aller Striche:`, {
             "embed": {
               "color": 13733151,
               "fields": fields
@@ -108,7 +109,7 @@ module.exports = class StricheService {
             });
         }
 
-        message.channel.send(`<@${message.author.id}> ${user.username} hat ${striche.length} Striche:`, {
+        message.channel.send(`${message.author} ${user.username} hat ${striche.length} Striche:`, {
             "embed": {
               "color": 13733151,
               "author": {
@@ -166,7 +167,7 @@ module.exports = class StricheService {
         let id = user.id;
         let executioner = message.author.id;
         this.db.Strich.create({'userid': id, 'reason': reason, 'executionerid': executioner}).then(() => {
-            message.channel.send(`Ein Strich für ${user.username} _"${reason}"_`);
+            message.channel.send(`Ein Strich für ${Discord.escapeMarkdown(user.username)} _"${Discord.escapeMarkdown(reason)}"_`);
         }).catch(err => {
             message.channel.send(`Ups da ist wohl etwas schief gelaufen.`);
             console.log(err);

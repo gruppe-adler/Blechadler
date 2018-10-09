@@ -163,7 +163,7 @@ module.exports = class StricheService {
             })
         }
 
-        message.channel.send(`<@${message.author.id}> ${user.username} hat ${reminders.length} laufende Reminder:`, {
+        message.channel.send(`${message.author} ${user.username} hat ${reminders.length} laufende Reminder:`, {
             "embed": {
               "color": 13733151,
               "author": {
@@ -173,7 +173,6 @@ module.exports = class StricheService {
               "fields": fields
             }
         });
-        message.channel.send(reminderMessage);
     }
 
     /**
