@@ -124,7 +124,7 @@ module.exports = class TeamspeakService {
 
     reconnect() {
         console.log('auto reconnecting to teamspeak server query');
-        setTimeout(this.setupTeamspeakQuery, 3000);
+        setTimeout(this.setupTeamspeakQuery.bind(this), 3000);
     }
 
     /**

@@ -67,7 +67,8 @@ module.exports = class StricheService {
 
             fields.push({
                 "name": user,
-                "value": `${amount} ${amount > 1 ? 'Striche' : 'Strich'}`
+                "value": `${amount} ${amount > 1 ? 'Striche' : 'Strich'}`,
+                "inline": true
             })
         }
 
