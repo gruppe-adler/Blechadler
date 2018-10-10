@@ -1,6 +1,11 @@
 const Utils = require('../services/Utils');
 
 module.exports = (discordClient, message, args, services) => {
-    message.channel.send(`Ich bin der Blechadler, eine Kombination aus Adler, Blech und Strom ${Utils.getEmoji(message.guild, 'adlerkopp')}`);
-    return;
+
+    if (args.length == 0) {
+        services.help.sendCommandOverview(message);
+        return;
+    }
+
+    services.help.sendCommand(message, args.join(' '));
 }

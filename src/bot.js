@@ -6,6 +6,7 @@ const TeamspeakService = require('./services/TeamspeakService');
 const StricheService = require('./services/StricheService');
 const ReminderService = require('./services/ReminderService');
 const ChannelService = require('./services/ChannelService');
+const HelpService = require('./services/HelpService');
 const Utils = require('./services/Utils');
 
 const client = new Discord.Client();
@@ -21,6 +22,7 @@ function setupDiscordClient() {
         services.striche = new StricheService(client);
         services.reminder = new ReminderService(client);
         services.channel = new ChannelService(client);
+        services.help = new HelpService(client);
     }, (err) => console.log(err));
 
     client.on('message', (message) => {

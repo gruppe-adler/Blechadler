@@ -1,0 +1,98 @@
+{
+    "channels": {
+        "title": "...Dir alle Offtopic-Channel auflisten",
+        "description": "Du würdest gern wissen über was für Scheiß hier noch gelabert wird, außer dieses komische Weapon 3?",
+        "format": "channels",
+        "examples": [
+            "channels"
+        ]
+    },
+    "channels add": {
+        "title": "...Member zu Offtopic-Channel hinzufügen",
+        "description": "Der Typ ist cool und soll mitreden, aber du bist zu faul dir die Permissions in Discord anzugucken?",
+        "format": "channel add <CHANNEL_NAME> (<USER_MENTION>)?",
+        "examples": [
+            "channels add #dcs",
+            "channels add #dcs @DerZade"
+        ]
+    },
+    "channels remove": {
+        "title": "...Member aus Offtopic-Channel entfernen",
+        "description": "Geht dir Spam in dem einen Channel aufn Sack? Ich schmeiß den Typen für dich gern raus :D",
+        "format": "channel add <CHANNEL_NAME> (<USER_MENTION>)?",
+        "examples": [
+            "channels remove #dcs",
+            "channels remove #dcs @DerZade"
+        ]
+    },
+    "pick": {
+        "title": "...Entscheidungen für dich treffen",
+        "description": "Probleme lebensverändernde Entscheidungen zu treffen? Ich übernehm das gerne für dich :D",
+        "format": "pick <option1> <option2> <option3> ... <optionX>",
+        "examples": [
+            "pick A-10C F-18C SU-25T"
+        ]
+    },
+    "reminder add": {
+        "title": "...Erinnerungen hinzufügen",
+        "description": "Du hast einen wichtigen Termin an den du gern erinnert werden würdest? Auf mich ist immer verlass. _(Solange Fussel nicht wieder vergisst mich anzumachen)_",
+        "format": "reminder (<USER_MENTION>)? (<YYYY-MM-DD>)? (<HH:MM>)? <TITLE>",
+        "examples": [
+            "reminder 13:36 Schnell in den Public 1337 schrieben!",
+            "reminder 2018-04-01 Pass auf Aprilscherze auf!",
+            "reminder 2020-04-01 00:01 Pass auf Aprilscherze auf!",
+            "reminder @DerZade 2018-04-01 00:01 Pass auf Aprilscherze auf!"
+        ]
+    },
+    "reminder delete": {
+        "title": "...Erinnerungen löschen",
+        "description": "Doch nicht an was erinnert werden? Kein Problem!",
+        "format": "reminder delete <ID>",
+        "examples": [
+            "reminder delete 1"
+        ]
+    },
+    "reminder list": {
+        "title": "...Erinnerungen auflisten",
+        "description": "Vergessen an was ich dich alles erinnern soll? Bist du aufn Kopf gefallen, oder warum vergisst du so viel?",
+        "format": "reminder <USER_MENTION>",
+        "examples": [
+            "reminder @DerZade"
+        ]
+    },
+    "strich": {
+        "title": "...Striche verteilen",
+        "description": "Hat fraggi schon wieder etwas gemacht, was einen Strich verdient hat?",
+        "format": "strich <USER_MENTION> <REASON>",
+        "examples": [
+            "strich @Xivid weil er schon wieder einen flachen Witz gerissen hat",
+            "strich @Willard weil er immer noch nicht seine Bewerbung geschrieben hat"
+        ]
+    },
+    "striche": {
+        "title": "...Dir ein Überblick über alle verteilten Striche geben",
+        "description": "Willst du wissen wer am meisten Striche hat, oder hast du Langeweile bei der Arbeit? Schau dir doch an wer alles fraggi striche gegeben hat.",
+        "format": "striche (<USER_MENTION>)?",
+        "examples": [
+            "strich",
+            "striche @fraggi"
+        ]
+    },
+    "teamspeak": {
+        "title": "...Dir helfen den Teampspeak zu stalken",
+        "description": "Möchtest du gern wissen wer aufm TS ist, traust dich aber nicht zu joinen?",
+        "format": "teamspeak",
+        "examples": [
+            "teamspeak",
+            "ts"
+        ]
+    },
+    "version": {
+        "title": "...Dir sagen wie alt ich bin",
+        "description": "Ringe zählen is bei mir nich. Musst mich schon fragen.",
+        "format": "version",
+        "examples": [
+            "version"
+        ]
+    }
+}
