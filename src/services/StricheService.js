@@ -72,7 +72,7 @@ module.exports = class StricheService {
             })
         }
 
-        message.channel.send(`${message.author} hier hast du eine Übersicht der aller Striche:`, {
+        message.channel.send(`${message.author} hier hast du eine Übersicht aller Striche:`, {
             "embed": {
               "color": 13733151,
               "fields": fields
