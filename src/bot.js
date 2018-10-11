@@ -48,30 +48,31 @@ function parseMention(message) {
         ''
     );
 
-    // question
-    if (parsedMessage.endsWith('?')) {
-        const random = Math.random();
-        let source;
-        if (random > 0.6) {
-            source = config.questioning.noAnswers;
-        } else if (random < 0.4) {
-            source = config.questioning.yesAnswers;
-        } else {
-            source = config.questioning.otherAnswers;
-        }
-
-        message.channel.send(source[Math.floor(Math.random() * source.length)]);
-        return;
-    }
-
-
+    
+    
     let args = parsedMessage.trim().split(/ +/g);
-
+    
     let command = args.shift().toLowerCase();
     command = commandAliases[command] || command;
-
+    
     if (config.commands.indexOf(command) == -1) {
-
+        
+        // question
+        if (parsedMessage.endsWith('?')) {
+            const random = Math.random();
+            let source;
+            if (random > 0.6) {
+                source = config.questioning.noAnswers;
+            } else if (random < 0.4) {
+                source = config.questioning.yesAnswers;
+            } else {
+                source = config.questioning.otherAnswers;
+            }
+    
+            message.channel.send(source[Math.floor(Math.random() * source.length)]);
+            return;
+        }
+        
         //TODO: Help
         message.channel.send(`Machst du mich extra von der Seite an? ${Utils.getEmoji(message.guild, 'slade')}`);
         return;
