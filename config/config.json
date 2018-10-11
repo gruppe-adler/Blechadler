@@ -37,5 +37,5 @@
     ]
   },
   "commandSymbol": "!",
-  "commands": ["channels", "help", "pick", "reminder", "strich", "striche", "teamspeak", "version"]
+  "commands": ["about", "channels", "help", "pick", "reminder", "strich", "striche", "teamspeak"]
 }

@@ -5,8 +5,8 @@ Blech + Adler = Blechadler | A discord bot
 - Clone this repository to a location of your choice
 - Run `npm install`
 - Copy `auth_sample.json` to `auth.json`
-- Fill in your discord bot client token and server query credentials into this config file
-- Review `config.json` and make sure `serverip`, `port`, `sid` (virtual server id) and `noticesTargetChannel` match your preferences
+- Fill in your discord bot client token and ts server query credentials into this config file
+- Review `config.json` and make sure `serverip`, `port`, `sid` (virtual server id), `category` and `noticesTargetChannel` match your preferences
 - Run `npm start`
 
 ### Needed permissions
@@ -26,6 +26,15 @@ All commands have to begin with the specified command symbol (`!` per default)
 
 ## Mention commands
 All commands have to be writted down directly after the bot's mention. Message has to start with the mention.
-- `version`: Displays the version of the bot
-- `ts`: Same as direct command
-- `help` or `über` or empty string: Displays the bot's info
+- `about`: Displays the version, description and name of the bot
+- `channel`: Same as direct command
+- `help`: Displays help to all commands / a specific command
+- `pick`: Picks a random answer from the given choices
+- `reminder`: Remind a user about something
+- `strich`: Add a "strich" to a user
+- `striche`: List all "striche"
+- `teamspeak`: Same as direct command
+
+## Extras
+- You can add aliases for all commands, by editing the command_aliases.json, with the key beeing th alias and the value beeing the command it should refer to.
+- You can disable commands by removig them from the commands array in the config. Each command matches one JavaScript file in src/commands

@@ -4,5 +4,6 @@
     "zuhilfe": "help",
     "channel": "channels",
     "remind": "reminder",
-    "ts": "teamspeak"
+    "ts": "teamspeak",
+    "version": "about"
 }

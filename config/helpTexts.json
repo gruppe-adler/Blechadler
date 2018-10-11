@@ -87,12 +87,12 @@
             "ts"
         ]
     },
-    "version": {
-        "title": "...Dir sagen wie alt ich bin",
-        "description": "Ringe zählen is bei mir nich. Musst mich schon fragen.",
-        "format": "version",
+    "about": {
+        "title": "...Dir meine innigsten Gehimnisse verraten",
+        "description": "Du wolltest schon immer alles über mich wissen?",
+        "format": "about",
         "examples": [
-            "version"
+            "about"
         ]
     }
 }
