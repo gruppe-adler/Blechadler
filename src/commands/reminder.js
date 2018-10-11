@@ -26,7 +26,6 @@ module.exports = (discordClient, message, args, services) => {
     }
 
 
-    // message matches 'remind(er)? 1997-09-10 Da wurd ich geboren'
     let authorid = message.author.id;
     let userid = authorid;
 
@@ -69,6 +68,12 @@ module.exports = (discordClient, message, args, services) => {
     if (isNaN(date)) {
         message.channel.send(`${message.author} Ich kann das Datum leider nicht lesen :(`);
         services.help.sendCommand(message, "reminder");
+        return;
+    }
+
+    // user is not in guild
+    if (! message.guild.member(userid)) {
+        message.channel.send(`${message.author} Du kannst keine Erinnerungen für User anlegen, die nicht hier sind.`);
         return;
     }
 
