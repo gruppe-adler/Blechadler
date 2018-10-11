@@ -103,7 +103,7 @@ module.exports = class StricheService {
 
         try {
             user.send(`<@${reminder.author}> wanted me to remind you about _${reminder.title}_`);
-        } catch {};
+        } catch(err){};
 
         // delete the reminder from the db
         await reminder.destroy();
