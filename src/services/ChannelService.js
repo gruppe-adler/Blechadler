@@ -41,6 +41,10 @@ module.exports = class ChannelService {
         if (channelName.match(Discord.MessageMentions.CHANNELS_PATTERN)) {
             let channel = message.mentions.channels.first();
             
+            if (!channel) {
+                return null;
+            }
+
             // mentioned is not a channel of the allowed category
             if (channel.parentID != this.getCategory(message).id) {
                 return null;
