@@ -12,6 +12,12 @@ module.exports = (discordClient, message, args, services) => {
     let userid = args.shift().replace(/^<@!?/i, '').replace(/>.*$/i, '');
     let user = message.mentions.users.find(user => (user.id == userid));
 
+    if (!user) {
+        message.channel.send(`${message.author} Ich habe den Member leider nicht gefunden.`);
+        services.help.sendCommand(message, "strich");
+        return;
+    }
+
     let reason = args.join(' ');
 
     services.striche.addStrich(message, user, reason);
