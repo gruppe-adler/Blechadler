@@ -3,7 +3,8 @@ const Discord = require('discord.js');
 module.exports = (discordClient, message, args, services) => {
 
     if (! args[0].match(Discord.MessageMentions.USERS_PATTERN)) {
-        //TODO: send help message
+        message.channel.send(`${message.author} \`${args[0]}\` ist kein Member.`);
+        services.help.sendCommand(message, "strich");
         return;
     }
 
@@ -22,5 +23,5 @@ module.exports = (discordClient, message, args, services) => {
 
     services.striche.addStrich(message, user, reason);
 
-    return true;
+    return;
 }

@@ -64,8 +64,6 @@ module.exports = class StricheService {
         let date = nextremider.date;
         let timeToReminder = date.getTime() - (new Date()).getTime();
 
-        //TODO: Reminder can be too big
-
         // delete reminder if it is in the past and find a new one again
         // we accept reminders which are up to 10 seconds in the past, because multiple reminders could be at the same date
         if (timeToReminder < -10000 ) {

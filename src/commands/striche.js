@@ -4,7 +4,6 @@ module.exports = (discordClient, message, args, services) => {
     let user = message.mentions.users.find(user => (user.id != discordClient.user.id));
     if (user) {       
         services.striche.sendUserStriche(message, user);
-
         return;
     }
 

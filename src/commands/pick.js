@@ -1,7 +1,7 @@
 module.exports = (discordClient, message, args, services) => {
     
     if (args.length == 0) {
-        //TODO: send help message
+        services.help.sendCommand(message, "pick");
         return;
     }
 

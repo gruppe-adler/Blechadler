@@ -3,7 +3,6 @@ const Discord = require('discord.js');
 module.exports = (discordClient, message, args, services) => {
 
     if (args.length == 0) {
-        //TODO: send help message
         services.reminder.listReminders(message, message.author);
         return;
     }
@@ -51,13 +50,14 @@ module.exports = (discordClient, message, args, services) => {
 
     // check wether any time / date was given
     if (!dateString && !timeString) {
-        //TODO -> Refer to help
-        message.channel.send(`${message.author} Du musst mir schon sagen, wann ich dich erinnern soll. Bitte folgendes Format: \`reminder [@mention] [YYYY-MM-DD] HH:MM <Titel>\``);
+        message.channel.send(`${message.author} Da hast du wohl irgendwa falsch gemacht.`);
+        services.help.sendCommand(message, "reminder");
         return;
     }
 
     if (args.length == 0) {
-        message.channel.send(`${message.author} Du musst mir schon sagen, an was ich dich erinnern soll. Bitte folgendes Format: \`reminder [@mention] [YYYY-MM-DD] HH:MM <Titel>\``);
+        message.channel.send(`${message.author} Da hast du wohl irgendwa falsch gemacht.`);
+        services.help.sendCommand(message, "reminder");
         return;
     }
     
@@ -68,6 +68,7 @@ module.exports = (discordClient, message, args, services) => {
     // check if date is invalid
     if (isNaN(date)) {
         message.channel.send(`${message.author} Ich kann das Datum leider nicht lesen :(`);
+        services.help.sendCommand(message, "reminder");
         return;
     }
 

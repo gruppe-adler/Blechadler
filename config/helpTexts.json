@@ -52,7 +52,7 @@
             "reminder delete 1"
         ]
     },
-    "reminder list": {
+    "reminder": {
         "title": "...Erinnerungen auflisten",
         "description": "Vergessen an was ich dich alles erinnern soll? Bist du aufn Kopf gefallen, oder warum vergisst du so viel?",
         "format": "reminder <USER_MENTION>",

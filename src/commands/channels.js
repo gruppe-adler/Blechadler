@@ -14,9 +14,8 @@ module.exports = (discordClient, message, args, services) => {
 
         // make sure arg matches either channel-mention or stats with #
         if(! args[0].match(Discord.MessageMentions.CHANNELS_PATTERN) && ! args[0].match(/^#.+&/i)) {
-            // TODO send help
             message.channel.send(`${message.author} _${Discord.escapeMarkdown(args[0])}_ ist kein Channel.`)
-
+            services.help.sendCommand(message, "channel add");
             return;
         }
 
@@ -40,9 +39,8 @@ module.exports = (discordClient, message, args, services) => {
 
         // make sure arg matches either channel-mention or stats with #
         if(! args[0].match(Discord.MessageMentions.CHANNELS_PATTERN) && ! args[0].match(/^#.+&/i)) {
-            // TODO send help
             message.channel.send(`${message.author} _${Discord.escapeMarkdown(args[0])}_ ist kein Channel.`)
-
+            services.help.sendCommand(message, "channel remove");
             return;
         }
 
