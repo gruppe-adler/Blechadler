@@ -9,7 +9,7 @@ Blech + Adler = Blechadler | A discord bot
 - Review `config.json` and make sure `serverip`, `port`, `sid` (virtual server id), `category` and `noticesTargetChannel` match your preferences
 - Run `npm start`
 
-### Needed permissions
+### Needed Teamspeak permissions
 The server query account needs at least this permissions
 - `b_serverquery_login`
 - `b_serverinstance_version_view`
@@ -19,6 +19,12 @@ The server query account needs at least this permissions
 - `b_virtualserver_client_list`
 - `i_channel_subscribe_power`
 - `i_channel_needed_subscribe_power`
+
+### Needed Discord permissions
+For the channel feature to work the Blechadler needs the following permissions at least for the channels category:
+- `Manage Permissions`
+- `Read Messages`
+- `Send Messages`
 
 ## Direct commands
 All commands have to begin with the specified command symbol (`!` per default)
