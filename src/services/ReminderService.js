@@ -101,7 +101,9 @@ module.exports = class StricheService {
         // fetch user from discord
         let user = await this.discordClient.fetchUser(reminder.userid);
 
-        user.send(`<@${reminder.author}> wanted me to remind you about _${reminder.title}_`);
+        try {
+            user.send(`<@${reminder.author}> wanted me to remind you about _${reminder.title}_`);
+        } catch {};
 
         // delete the reminder from the db
         await reminder.destroy();

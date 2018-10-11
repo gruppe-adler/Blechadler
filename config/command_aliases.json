@@ -1,9 +1,11 @@
 {
     "über": "help",
     "halp": "help",
+    "?": "help",
     "zuhilfe": "help",
     "channel": "channels",
     "remind": "reminder",
+    "erinnerung": "reminder",
     "ts": "teamspeak",
     "version": "about"
 }
