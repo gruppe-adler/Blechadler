@@ -13,7 +13,7 @@ module.exports = (discordClient, message, args, services) => {
         args.shift();
 
         // make sure arg matches either channel-mention or stats with #
-        if(! args[0].match(Discord.MessageMentions.CHANNELS_PATTERN) && ! args[0].match(/^#.+&/i)) {
+        if(! args[0].match(Discord.MessageMentions.CHANNELS_PATTERN) && ! args[0].match(/^#.+/i)) {
             message.channel.send(`${message.author} _${Discord.escapeMarkdown(args[0])}_ ist kein Channel.`)
             services.help.sendCommand(message, "channel add");
             return;
