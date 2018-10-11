@@ -21,7 +21,10 @@ The server query account needs at least this permissions
 - `i_channel_needed_subscribe_power`
 
 ### Needed Discord permissions
-For the channel feature to work the Blechadler needs the `Manage Permissions` for the channels category.
+For the channel feature to work the Blechadler needs the following permissions at least for the channels category:
+- `Manage Permissions`
+- `Read Messages`
+- `Send Messages`
 
 ## Direct commands
 All commands have to begin with the specified command symbol (`!` per default)
