@@ -65,6 +65,12 @@ module.exports = (discordClient, message, args, services) => {
     timeString = timeString || '09:00';
     let date = new Date(dateString.concat(' ').concat(timeString));
 
+    // check if date is invalid
+    if (isNaN(date)) {
+        message.channel.send(`${message.author} Ich kann das Datum leider nicht lesen :(`);
+        return;
+    }
+
     // requested date is in the past
     if (date.getTime() < (new Date()).getTime()) {
         message.channel.send(`Ehh ${message.author} du Held. Ich kann dich schlecht an einem vergangenen Zeitpunkt erinnern. Seh ich wie Marty McFly aus oder was?`);
