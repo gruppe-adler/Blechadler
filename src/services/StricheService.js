@@ -66,11 +66,14 @@ module.exports = class StricheService {
             let amount = striche[id];
 
             fields.push({
+                "amount": amount,
                 "name": user,
                 "value": `${amount} ${amount > 1 ? 'Striche' : 'Strich'}`,
                 "inline": true
             })
         }
+
+        fields = fields.sort((a, b) => b.amount - a.amount);
 
         message.channel.send(`${message.author} hier hast du eine Übersicht aller Striche:`, {
             "embed": {
@@ -140,7 +143,7 @@ module.exports = class StricheService {
         
             usersWithCount[id] = count;
         }
-        
+
         return usersWithCount;
     }
 
