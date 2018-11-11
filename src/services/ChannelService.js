@@ -86,7 +86,6 @@ module.exports = class ChannelService {
         let channel = this.findChannel(message, channelName);
         if (!channel) {
             message.channel.send(`${message.author} Ich habe keinen Channel namens _#${channelName}_ gefunden.`);
-            services.help.sendCommand(message, "channels add");
             return;
         }
 
@@ -115,7 +114,6 @@ module.exports = class ChannelService {
         let channel = this.findChannel(message, channelName);
         if (!channel) {
             message.channel.send(`${message.author} Ich habe keinen Channel namens _#${channelName}_ gefunden.`);
-            services.help.sendCommand(message, "channels remove");
             return;
         }
 
