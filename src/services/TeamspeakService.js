@@ -103,7 +103,7 @@ module.exports = class TeamspeakService {
             this.broadcastMessage(`➡️  **${response.client_nickname}** joined`);
             this.teamspeakClient.send('clientinfo', {clid: response.clid}, ((err, clientData) => {
 
-                if (clientDate == null) return;
+                if (clientData == null) return;
 
                 this.activeUsers[response.clid.toString()] = clientData.client_nickname;
                 if (this.isNewUser(clientData.client_created)) {
