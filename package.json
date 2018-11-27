@@ -22,6 +22,6 @@
     "release:major": "release-it major -n"
   },
   "devDependencies": {
-    "release-it": "^7.2.1"
+    "release-it": "^8.1.0"
   }
 }
