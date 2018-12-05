@@ -10,6 +10,7 @@ module.exports = class TeamspeakService {
     constructor (client) {
         this.discordClient = client;
         this.activeUsers = [];
+        this.connected = false;
 
         this.setupTeamspeakQuery();
         this.findTargetChannel();
@@ -39,8 +40,9 @@ module.exports = class TeamspeakService {
     * Logs into server query with provided credentials and selects the target virtual server
     * Registers a server notify event to catch joining/leaving users
     */
-   onConnect() {
-       this.teamspeakClient.send('login', {client_login_name: auth.serverquery.username, client_login_password: auth.serverquery.password}, ((err, response) => {
+    onConnect() {
+        this.connected = true;
+        this.teamspeakClient.send('login', {client_login_name: auth.serverquery.username, client_login_password: auth.serverquery.password}, ((err, response) => {
            if (err) {
                console.log('failed to login into ts query', err);
                return;
@@ -126,6 +128,7 @@ module.exports = class TeamspeakService {
     }
 
     reconnect() {
+        this.connected = false;
         console.log('auto reconnecting to teamspeak server query');
         setTimeout(this.setupTeamspeakQuery.bind(this), 3000);
     }
@@ -161,6 +164,12 @@ module.exports = class TeamspeakService {
     sendClientList(message) {
         if (config.teamspeak.noticesTargetChannel.indexOf(message.channel.name) === -1) {
             message.channel.send(`Du bist leider im falschen Channel dafür ☹`);
+            return;
+        }
+
+        // exit if blechadler has lost connection to ts
+        if (! this.connected) {
+            message.channel.send(`Ich habe aktuell keine Verbindung zum Teamspeak ☹`);            
             return;
         }
 
