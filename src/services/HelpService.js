@@ -60,7 +60,7 @@ module.exports = class HelpService {
         if (obj.hasOwnProperty("examples")) {
             fields.push({
                 "name": "Beispiele:",
-                "value": `${client.user} \`${obj.examples.join('`\n`')}\``
+                "value": `${this.discordClient.user} \`${obj.examples.join('`\n`')}\``
             });
             for (let i = 0; i < obj.examples.length; i++) {
                 const example = obj.examples[i];
