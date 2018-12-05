@@ -15,7 +15,7 @@ module.exports = class HelpService {
         for (const command in helpTexts) {
             if (helpTexts.hasOwnProperty(command)) {
                 const element = helpTexts[command];
-                commands.push(`${element.title}: \`help ${command}\``);
+                commands.push(`${element.title} (Mehr Infos: \`help ${command}\`)`);
             }
         }
 
@@ -60,7 +60,7 @@ module.exports = class HelpService {
         if (obj.hasOwnProperty("examples")) {
             fields.push({
                 "name": "Beispiele:",
-                "value": `\`${obj.examples.join('`\n`')}\``
+                "value": `${client.user} \`${obj.examples.join('`\n`')}\``
             });
             for (let i = 0; i < obj.examples.length; i++) {
                 const example = obj.examples[i];
