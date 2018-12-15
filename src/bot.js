@@ -23,7 +23,7 @@ function setupDiscordClient() {
         services.reminder = new ReminderService(client);
         services.channel = new ChannelService(client);
         services.help = new HelpService(client);
-    }, (err) => console.log(err));
+    }, (err) => console.error('Error creating discord client:', err));
 
     client.on('message', (message) => {
         if (hasBeenMentionend(message)) {

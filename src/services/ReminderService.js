@@ -1,4 +1,5 @@
 const Sequelize = require('sequelize');
+const Utils = require('./Utils');
 
 module.exports = class StricheService {
 
@@ -24,9 +25,9 @@ module.exports = class StricheService {
         });
         
         this.db.authenticate().then(() => {
-            console.log('Database-Connection has been established successfully.');
+            console.log(`Database-Connection has been established successfully. (${Utils.getDateTime()})`);
         }).catch(err => {
-            console.error('Unable to connect to the database:', err);
+            console.error(`Unable to connect to the database:`, err);
         });
         
         this.db.Reminder = this.db.define('reminder', {
@@ -133,7 +134,7 @@ module.exports = class StricheService {
             this.setTimeoutToNextReminder();
         }).bind(this)).catch(err => {
             message.channel.send(`Ups da ist wohl etwas schief gelaufen.`);
-            console.log(err);
+            console.error(`Error adding reminder (${Utils.getDateTime()}):`, err);
         });
     }
    

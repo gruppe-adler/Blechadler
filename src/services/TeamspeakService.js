@@ -44,16 +44,16 @@ module.exports = class TeamspeakService {
         this.connected = true;
         this.teamspeakClient.send('login', {client_login_name: auth.serverquery.username, client_login_password: auth.serverquery.password}, ((err, response) => {
            if (err) {
-               console.log('failed to login into ts query', err);
+               console.error(`failed to login into ts query (${Utils.getDateTime()}):`, err);
                return;
             }
             
             this.teamspeakClient.send('use', {sid: config.teamspeak.sid}, ((err, response) => {
                 if (err) {
-                    console.log('failed to select virtual server', err);
+                    console.error(`failed to select virtual server (${Utils.getDateTime()}):`, err);
                 } else {
                     this.teamspeakClient.send('servernotifyregister', {event: 'server'}, ((err, response) => {
-                        console.log('connected and logged into ts query');
+                        console.log(`connected and logged into ts query (${Utils.getDateTime()})`);
                         this.sendPing();
                         this.cacheClients();
                     }).bind(this));
@@ -68,7 +68,7 @@ module.exports = class TeamspeakService {
      */
     sendPing() {
         this.teamspeakClient.send('version', (() => {
-            console.log('ts query ping');
+            console.log(`ts query ping (${Utils.getDateTime()})`);
             setTimeout(this.sendPing.bind(this), 60000);
         }).bind(this));
     }
@@ -129,7 +129,7 @@ module.exports = class TeamspeakService {
 
     reconnect() {
         this.connected = false;
-        console.log('auto reconnecting to teamspeak server query');
+        console.log(`auto reconnecting to teamspeak server query (${Utils.getDateTime()})`);
         setTimeout(this.setupTeamspeakQuery.bind(this), 3000);
     }
 
