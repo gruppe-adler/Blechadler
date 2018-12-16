@@ -11,6 +11,7 @@ module.exports = class TeamspeakService {
         this.discordClient = client;
         this.activeUsers = [];
         this.connected = false;
+        this.reconnectTimeout = null;
 
         this.setupTeamspeakQuery();
         this.findTargetChannel();
@@ -130,7 +131,12 @@ module.exports = class TeamspeakService {
     reconnect() {
         this.connected = false;
         console.log(`auto reconnecting to teamspeak server query (${Utils.getDateTime()})`);
-        setTimeout(this.setupTeamspeakQuery.bind(this), 3000);
+
+        if (this.reconnectTimeout != null) {
+            clearTimeout(this.reconnectTimeout);
+        }
+
+        this.reconnectTimeout = setTimeout(this.setupTeamspeakQuery.bind(this), 3000);
     }
 
     /**
