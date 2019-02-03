@@ -9,6 +9,22 @@ Blech + Adler = Blechadler | A discord bot
 - Review `config.json` and make sure `serverip`, `port`, `sid` (virtual server id), `category` and `noticesTargetChannel` match your preferences
 - Run `npm start`
 
+## Installation Docker
+A docker image is available on [docker hub](https://hub.docker.com/r/gruppeadler/blechadler).  
+The app is located in `/usr/src/app/` so you want to either copy your `auth.json` directly into the dockers `/usr/src/app/config/` directory or use volumes to add/modify the config files. The other directory you may want to acccess is `usr/src/app/db` which includes the sqlite database user for reminders etc.
+
+Here is an example `docker-compose.yml`:
+```yml
+version: '3'
+services: 
+    blechadler:
+        image: gruppeadler/blechadler
+        volumes:
+            - /usr/blechadler/config/auth.json:/usr/src/app/config/auth.json
+            - /usr/blechadler/config/config.json:/usr/src/app/config/config.json
+            - /usr/blechadler/db:/usr/src/app/db
+```
+
 ### Needed Teamspeak permissions
 The server query account needs at least this permissions
 - `b_serverquery_login`
