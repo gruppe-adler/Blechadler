@@ -14,4 +14,4 @@ RUN npm ci
 # Bundle app source
 COPY . .
 
-CMD [ "npm", "start" ]
+ENTRYPOINT [ "npm", "start" ]
