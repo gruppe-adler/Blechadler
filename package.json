@@ -10,7 +10,7 @@
     "discord.js": "^11.3.2",
     "gamedig": "^1.0.45",
     "node-teamspeak": "^1.0.10",
-    "sequelize": "^5.3.0",
+    "sequelize": "^5.15.1",
     "sqlite3": "^4.0.2"
   },
   "scripts": {
