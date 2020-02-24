@@ -44,7 +44,7 @@ function parseMention(message) {
 
     // Remove blechadler mention and trailing spaces in the beginning 
     let parsedMessage = message.content.replace(
-        new RegExp(`${client.user}[ ]*`, 'i'),
+        new RegExp(`^<@!?${client.user.id}>\\s*`, 'i'),
         ''
     );
 
@@ -106,7 +106,7 @@ function hasBeenMentionend(message) {
     }
 
     //only counts as mentioned if the message starts with the blechadler mention
-    return (message.content.match(new RegExp(`^${client.user}`,'i')));
+    return new RegExp(`^<@!?${client.user.id}>`, 'i').test(message.content);
 }
 
 /*
