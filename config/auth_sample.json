@@ -1,7 +1,0 @@
-{
-	"token": "my_discord_bot_client_token",
-	"serverquery": {
-		"username": "server_query_username",
-		"password": "server_query_password"
-	}
-}
