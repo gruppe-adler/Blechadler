@@ -1,0 +1,35 @@
+{
+  "name": "Blechadler",
+  "version": "3.0.0",
+  "description": "Blech + Adler = Blechadler",
+  "main": "dist/index.js",
+  "scripts": {
+    "lint": "eslint --ext .js,.ts ./src",
+    "serve": "ts-node-dev --inspect --respawn ./src/index.ts",
+    "build": "npm run lint && tsc",
+    "prod": "node ./build/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github:gruppe-adler/Blechadler"
+  },
+  "keywords": [],
+  "author": "Gruppe Adler",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^12.4.0",
+    "node-ts": "^5.1.1",
+    "typescript": "^4.0.3"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.5.0",
+    "@typescript-eslint/parser": "^4.5.0",
+    "eslint": "^7.11.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
+    "ts-node-dev": "^1.0.0"
+  }
+}
