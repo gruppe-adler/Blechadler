@@ -1,61 +1,43 @@
-import TeamspeakService, { TeamspeakChannel, TeamspeakUser, TeamspeakUserType } from './TeamspeakService';
+import Discord from 'discord.js';
 
-import config from './config';
+export default class Blechadler {
+    private discordClient: Discord.Client;
 
-const { ip, port, sid, username, password } = config.teamspeak;
+    constructor() {
+        this.discordClient = new Discord.Client();
 
-const tsService = new TeamspeakService(ip, port, sid, username, password);
+        // this.discordClient.login(auth.token);
 
-const printUser = (user: TeamspeakUser) => {
-    return `> ${user.nickname}`;
-};
-
-const printChannel = (channel: TeamspeakChannel, depth = 0): string => {
-    const space = ' '.repeat(4 * depth);
-
-    let channelStr = '';
-
-    for (const user of channel.users) {
-        channelStr += `${space}${printUser(user)}\n`;
+        // this.discordClient.on('ready' () => {
+        //     // TODO
+        // });
     }
 
-    for (const c of channel.channels) {
-        channelStr += printChannel(c, depth + 1);
+    /**
+     * Send message to channel.
+     * @param channelID Channel ID of text channel
+     * @param message Message to send
+     * @param options Message options
+     */
+    public async sendMessageToChannel(channelID: string, message: string, options?: Discord.MessageOptions): Promise<void> {
+        try {
+            const channel = await this.discordClient.channels.fetch(channelID.toString());
+            if (channel.type !== 'text') throw new Error('Cannot send message to channel with type other than "text"');
+            (channel as Discord.TextChannel).send(message, options);
+        } catch (err) {
+            // TODO: Log error
+        }
     }
 
-    if (channelStr.length === 0) return '';
+    public subscribeToMessages(filter: (msg: Discord.Message) => boolean, channelIDs: string[] = [], callback: (msg: Discord.Message) => unknown): void {
+        this.discordClient.on('message', msg => {
+            if (channelIDs.length > 0 && !channelIDs.includes(msg.channel.id)) return;
+            if (!filter(msg)) return;
 
-    if (channel.users.length > 0) {
-        return `${space}**${channel.name}** (${channel.users.length})\n${channelStr}`;
-    } else {
-        return `${space}**${channel.name}**\n${channelStr}`;
+            callback(msg);
+        });
     }
-};
+}
 
-const showUsers = () => tsService.getChannels().then(channels => {
-    const str = channels.map(channel => printChannel(channel, 0)).filter(chStr => chStr.length > 0).join('\n');
-
-    console.log(str);
-});
-
-tsService.on('query_connected', () => {
-    console.log('query_connected');
-
-    showUsers();
-
-    setInterval(showUsers, 5 * 60 * 1000);
-});
-
-tsService.on('query_disconnected', () => console.log('query_disconnected'));
-tsService.on('error', err => console.error('error', err));
-
-tsService.on('connected', ({ nickname, type }) => {
-    if (type === TeamspeakUserType.Query) return;
-
-    console.log(`${nickname} connected!`);
-});
-tsService.on('disconnected', ({ nickname, type }) => {
-    if (type === TeamspeakUserType.Query) return;
-
-    console.log(`${nickname} disconnected!`);
-});
+// eslint-disable-next-line no-new
+new Blechadler();

@@ -4,7 +4,7 @@ interface TeamspeakConfig {
     sid: number;
     username: string;
     password: string;
-    discordChannelID: number;
+    discordChannelIDs: string[];
 }
 
 // interface BirthdayEntries {

@@ -109,7 +109,7 @@ class TeamspeakService extends EventEmitter {
         this.query.on('close', () => {
             this.connected = false;
             this.emit('query_disconnected');
-            console.log(`Trying to reconnect in ${this.queryTimeout / 1000}s`);
+            console.log(`[TS3 SERVICE] Trying to reconnect in ${this.queryTimeout / 1000}s`);
             setTimeout(() => this.connectToQuery(), this.queryTimeout);
             this.queryTimeout *= 2;
         });
@@ -217,7 +217,7 @@ class TeamspeakService extends EventEmitter {
 
     /**
      * Get all channels
-     * @returns {Promise<TeamspeakChannel[]>} users
+     * @returns {Promise<TeamspeakChannel[]>} channels
      */
     public async getChannels(): Promise<TeamspeakChannel[]> {
         const { response: queryChannels } = await this.query.send('channellist', {}, []);
@@ -255,6 +255,13 @@ class TeamspeakService extends EventEmitter {
         }));
 
         return getChildChannels(0);
+    }
+
+    /**
+     * Getter for connected
+     */
+    public get isConnected(): boolean {
+        return this.connected;
     }
 }
 
