@@ -29,6 +29,12 @@ export default class Blechadler {
         }
     }
 
+    /**
+     * Subscribe to messages, which are within given channels and pass given filter function.
+     * @param filter Filter function; will be passed the message and has to return true for the callback to be called
+     * @param channelIDs IDs of all channel in which message has to be for callback to called; Empty array = all channels
+     * @param callback Callback
+     */
     public subscribeToMessages(filter: (msg: Discord.Message) => boolean, channelIDs: string[] = [], callback: (msg: Discord.Message) => unknown): void {
         this.discordClient.on('message', msg => {
             if (channelIDs.length > 0 && !channelIDs.includes(msg.channel.id)) return;
