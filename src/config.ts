@@ -13,6 +13,7 @@ interface TeamspeakConfig {
 // }
 
 interface Config {
+    token: string;
     teamspeak: TeamspeakConfig;
     // birthdays: BirthdayEntries[]
 }

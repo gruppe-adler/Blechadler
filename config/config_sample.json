@@ -1,4 +1,5 @@
 {
+    "token": "<INSERT DISCORD BOT TOKEN>",
     "teamspeak": {
         "ip": "ts.gruppe-adler.de",
         "port": 10011,

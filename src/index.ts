@@ -1,4 +1,6 @@
-import Discord from 'discord.js';
+import * as Discord from 'discord.js';
+import config from './config';
+import TeamspeakPlugin from './plugins/TeamspeakPlugin';
 
 export default class Blechadler {
     private discordClient: Discord.Client;
@@ -6,11 +8,13 @@ export default class Blechadler {
     constructor() {
         this.discordClient = new Discord.Client();
 
-        // this.discordClient.login(auth.token);
+        this.discordClient.login(config.token);
 
-        // this.discordClient.on('ready' () => {
-        //     // TODO
-        // });
+        this.discordClient.on('ready', () => {
+            console.log('Discord Logged In');
+            // eslint-disable-next-line no-new
+            new TeamspeakPlugin(this);
+        });
     }
 
     /**
