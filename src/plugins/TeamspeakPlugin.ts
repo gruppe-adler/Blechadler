@@ -20,28 +20,25 @@ export default class TeamspeakPlugin extends BlechadlerPlugin {
     /**
      * Pretty print teamspeak channel
      * @param currentChannel Channel to print
-     * @param depth Depth (used for indentation)
      */
-    private static printChannel(currentChannel: TeamspeakChannel, depth = 0): string {
-        const space = ' '.repeat(4 * depth);
-
+    private static printChannel(currentChannel: TeamspeakChannel): string {
         let channelStr = '';
 
-        for (const user of currentChannel.users) {
-            channelStr += `${space}${TeamspeakPlugin.printUser(user)}\n`;
+        if (currentChannel.users.length > 0) {
+            for (const user of currentChannel.users) {
+                channelStr += `${TeamspeakPlugin.printUser(user)}\n`;
+            }
+
+            channelStr = `**${currentChannel.name}** (${currentChannel.users.length})\n${channelStr}`;
         }
 
         for (const channel of currentChannel.channels) {
-            channelStr += TeamspeakPlugin.printChannel(channel, depth + 1);
+            const str = TeamspeakPlugin.printChannel(channel);
+            if (str.length === 0) continue;
+            channelStr += `${channelStr.length > 0 ? '\n' : ''}${str}`;
         }
 
-        if (channelStr.length === 0) return '';
-
-        if (currentChannel.users.length > 0) {
-            return `${space}**${currentChannel.name}** (${currentChannel.users.length})\n${channelStr}`;
-        } else {
-            return `${space}**${currentChannel.name}**\n${channelStr}`;
-        }
+        return channelStr;
     }
 
     /**
@@ -102,21 +99,21 @@ export default class TeamspeakPlugin extends BlechadlerPlugin {
                 }
 
                 let response = '▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n';
-                response += `**Benutzer online:** ${clientCount}\n\n`;
+                response += `**Benutzer online:** ${clientCount}\n`;
 
                 for (const channel of channels) {
                     const str = TeamspeakPlugin.printChannel(channel);
 
                     if (str.length === 0) continue;
 
-                    response += str + '\n';
+                    response += `\n${str}`;
                 }
 
-                response += '\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬';
+                response += '▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬';
 
-                msg.channel.send(response);
+                msg.reply(response);
             } catch (err) {
-                msg.channel.send('Da is irgendetwas schief gelaufen 😰. Bitte hau mich nicht 🥺');
+                msg.reply('Da is irgendetwas schief gelaufen 😰. Bitte hau mich nicht 🥺');
             }
         });
     }
