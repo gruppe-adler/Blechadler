@@ -14,6 +14,7 @@ interface TeamspeakConfig {
 
 interface Config {
     token: string;
+    botChannel: string;
     teamspeak: TeamspeakConfig;
     // birthdays: BirthdayEntries[]
 }

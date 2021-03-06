@@ -98,7 +98,7 @@ export default class TeamspeakPlugin extends BlechadlerPlugin {
                     return;
                 }
 
-                let response = '▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n';
+                let response = '\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n';
                 response += `**Benutzer online:** ${clientCount}\n`;
 
                 for (const channel of channels) {
