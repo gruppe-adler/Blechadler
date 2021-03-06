@@ -1,5 +1,6 @@
 .git/
-db/
 node_modules/
-LICENSE
+dist/
+config/config.json
 README.md
+LICENSE

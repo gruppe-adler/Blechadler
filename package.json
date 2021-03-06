@@ -7,7 +7,7 @@
     "lint": "eslint --ext .js,.ts ./src",
     "serve": "ts-node-dev --inspect --respawn ./src/index.ts",
     "build": "npm run lint && tsc",
-    "prod": "node ./build/index.js"
+    "start": "node ./dist/index.js"
   },
   "repository": {
     "type": "git",
