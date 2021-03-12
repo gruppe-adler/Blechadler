@@ -82,7 +82,7 @@ export default class TeamspeakPlugin extends BlechadlerPlugin {
         });
 
         // subscribe to !ts messages
-        this.blechadler.subscribeToMessages(msg => (msg.content === '!ts'), discordChannelIDs, async msg => {
+        this.blechadler.subscribeToMessages(msg => /^⠀*!ts⠀*$/i.test(msg.content), discordChannelIDs, async msg => {
             if (!service.isConnected) {
                 msg.channel.send('Ich habe aktuell keine Verbindung zum Teamspeak 😰. Bitte hau mich nicht 🥺');
                 return;
