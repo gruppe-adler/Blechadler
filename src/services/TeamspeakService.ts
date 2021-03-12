@@ -87,8 +87,13 @@ class TeamspeakService extends EventEmitter {
 
         // callback when query reports client joining
         this.query.on('cliententerview', clients => {
-            clients.forEach(client => {
-                const user = TeamspeakService.queryUserToTeamspeakUser(client);
+            clients.forEach(async client => {
+                // we don't get a full client when notified so we'll have to retrieve the full client info
+                const { response: fullClientList } = await this.query.send('clientinfo', { clid: client.clid });
+                if (fullClientList.length === 0) return;
+                const fullClient = fullClientList[0];
+
+                const user = TeamspeakService.queryUserToTeamspeakUser(fullClient);
 
                 this.userCache.set(client.clid, user);
 
@@ -100,6 +105,8 @@ class TeamspeakService extends EventEmitter {
         this.query.on('clientleftview', clients => {
             clients.forEach(client => {
                 const user = this.getUserForId(client.clid);
+
+                if (user === null) return;
 
                 this.userCache.delete(user.id);
                 this.emit('disconnected', user);
