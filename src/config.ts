@@ -7,16 +7,20 @@ interface TeamspeakConfig {
     discordChannelIDs: string[];
 }
 
-// interface BirthdayEntries {
-//     userId: number;
-//     birthday: string;
-// }
+interface BirthdaysConfig {
+    discordChannelIDs: string[];
+}
+
+interface LeetConfig {
+    discordChannelIDs: string[];
+}
 
 interface Config {
     token: string;
     botChannel: string;
     teamspeak: TeamspeakConfig;
-    // birthdays: BirthdayEntries[]
+    birthdays: BirthdaysConfig;
+    leet: LeetConfig;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires

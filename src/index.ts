@@ -1,6 +1,8 @@
 import * as Discord from 'discord.js';
 import config from './config';
 import TeamspeakPlugin from './plugins/TeamspeakPlugin';
+import BirthdayPlugin from './plugins/BirthdayPlugin';
+import LeetPlugin from './plugins/LeetPlugin';
 
 export default class Blechadler {
     private discordClient: Discord.Client;
@@ -14,6 +16,8 @@ export default class Blechadler {
             console.log('Discord Logged In');
             /* eslint-disable no-new */
             new TeamspeakPlugin(this);
+            new BirthdayPlugin(this);
+            new LeetPlugin(this);
             /* eslint-enable no-new */
         });
     }
