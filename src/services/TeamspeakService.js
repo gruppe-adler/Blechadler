@@ -103,7 +103,7 @@ module.exports = class TeamspeakService {
     */
     onUserEnter(response) {
         if (response.client_type === 0) {
-            this.broadcastMessage(`➡️  **${response.client_nickname}** joined`);
+            this.broadcastMessage(`:green_circle:  **${response.client_nickname}** joined`);
             this.teamspeakClient.send('clientinfo', {clid: response.clid}, ((err, clientData) => {
 
                 if (clientData == null) return;
@@ -124,7 +124,7 @@ module.exports = class TeamspeakService {
         if (this.activeUsers[response.clid.toString()]) {
             const username = this.activeUsers[response.clid.toString()];
             delete this.activeUsers[response.clid.toString()];
-            this.broadcastMessage(`⬅️  **${username}** left`);
+            this.broadcastMessage(`:red_circle:  **${username}** left`);
         }
     }
 
