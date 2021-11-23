@@ -7,5 +7,11 @@
         "username": "Blechadler",
         "password": "<ENTER QUERY PASSWORD HERE>",
         "discordChannelIDs": ["296530538855137282"]
+    },
+    "birthdays": { 
+        "discordChannelIDs": []
+    },
+    "leet": { 
+        "discordChannelIDs": []
     }
 }
