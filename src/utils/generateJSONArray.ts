@@ -5,7 +5,7 @@ import * as fs from 'fs';
  * @param {string} path Path to JSON file
  * @returns {T[]} Proxied Array
  */
-export default function generateJSONArray<T>(path: string): T[] {
+export default function generateJSONArray<T> (path: string): T[] {
     let arr: T[] = [];
 
     if (fs.existsSync(path)) {
@@ -13,7 +13,7 @@ export default function generateJSONArray<T>(path: string): T[] {
     }
 
     return new Proxy(arr, {
-        set(target, property, value) {
+        set (target, property, value) {
             target[property] = value;
             const json = JSON.stringify(target, null, 4);
             fs.writeFileSync(path, json, 'utf8');

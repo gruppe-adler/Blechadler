@@ -3,24 +3,24 @@ import * as path from 'path';
 import generateJSONArray from '../utils/generateJSONArray';
 
 interface BirthdayEntry {
-    userID: string;
+    userID: string
     // in format YYYY-MM-DD
-    birthDate: string;
-    name: string;
+    birthDate: string
+    name: string
 }
 
 const BIRTHDAYS_PATH = path.resolve(__dirname, '../../config/birthdays.json');
 
 export default class BirthdayService extends EventEmitter {
     private birthdays: BirthdayEntry[];
-    private checkHour: number;
+    private readonly checkHour: number;
 
     /**
      * Creates a new BirthdayService instance.
      *
      * @param hourToCheck At which hour of the day, the check for birthdays should take place.
      */
-    constructor(private hourToCheck: number = 7) {
+    constructor (private readonly hourToCheck: number = 7) {
         super();
         this.checkHour = hourToCheck;
         // Converting all birthDate strings into actual dates
@@ -31,7 +31,7 @@ export default class BirthdayService extends EventEmitter {
     /**
      * Starts the periodical check for birthdays
     */
-    private startCheckCycle(): void {
+    private startCheckCycle (): void {
         // schedule the first check for 0800
         setTimeout(() => {
             this.checkForBirthdays();
@@ -45,7 +45,7 @@ export default class BirthdayService extends EventEmitter {
      *
      * @returns The time until the next check in milliseconds.
      */
-    private get timeUntilFirstCheck(): number {
+    private get timeUntilFirstCheck (): number {
         const now = new Date();
         const currentDay = new Date();
         currentDay.setHours(this.checkHour);
@@ -64,7 +64,7 @@ export default class BirthdayService extends EventEmitter {
      * Emits a 'birthday_detected' event, containing all userIDs and birthDates of Adler that celebrate their birthday on the current day.
      * If no birthday is taking place, no event is emitted.
      */
-    private checkForBirthdays(): void {
+    private checkForBirthdays (): void {
         const currentDate = new Date();
         // filter all Birthdays to return only entries, where the currentDate is a birthday
         const filteredBirthdays = this.birthdays.filter(({ birthDate }) => {

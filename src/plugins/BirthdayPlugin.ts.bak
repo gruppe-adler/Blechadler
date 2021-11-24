@@ -1,6 +1,10 @@
 import BirthdayService from '../services/BirthdayService';
-import BlechadlerPlugin from './Plugin';
 import config from '../config';
+import BlechadlerPlugin from '../core/Plugin';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { CommandInteraction } from 'discord.js';
+import BlechadlerCommand from '../core/Command';
+import TeamspeakPlugin from './TeamspeakPlugin';
 
 // RegEx-pattern containing a date in format YYYY-MM-DD, also taking leap-years into account. If there are multiple dates, only the first will match
 // The string can contain more characters and will still match the pattern. E.g. 'test1980-12-16test' would still match, as well as '1231980-12-16123'
@@ -26,39 +30,38 @@ export default class BirthdayPlugin extends BlechadlerPlugin {
             }
             // send the message in #general
             for (const channel of config.birthdays.discordChannelIDs) {
-                this.blechadler.sendMessageToChannel(channel, msg);
+                this.blechadler.sendMsg(channel, msg);
             }
         });
 
-        this.blechadler.registerHelpMessage(
-            'Antworte auf diese Nachricht, um den Geburtstag eines Adlers hinzuzufügen\nDie Antwort muss Folgendes enthalten:\n- Ein Geburtsdatum im Format YYYY-MM-DD (z.B. 1950-03-10 für den 10. März 1950)\n- Eine mention/tag des Adlers, der hinzugefügt werden soll. Z.B. <@681498875621670964>',
-            {},
-            async msg => {
-                const dateMatches = msg.content.match(DATE_PATTERN);
+        const birthdayCommand = new BlechadlerCommand();
+        birthdayCommand.meta = new SlashCommandBuilder().setName('ts').setDescription('Teamspeak Status').setDefaultPermission(true);
+        birthdayCommand.execute = async (interaction: CommandInteraction) => {
+            const dateMatches = interaction.options.data.match(DATE_PATTERN);
 
-                if (dateMatches === null) {
-                    await msg.reply('Du musst mir schon ein gescheites Datum geben, du Dulli!');
-                    return;
-                }
-                const birthDate = dateMatches[0];
-
-                const user = msg.mentions.users.find(user => user.id !== this.blechadler.discordClientId);
-
-                if (!user) {
-                    await msg.reply('Du musst mir schon sagen wessen Geburtstag das ist, du Dulli!');
-                    return;
-                }
-
-                try {
-                    service.addBirthdayEntry(user.id, birthDate, user.username);
-
-                    const d = new Date(birthDate);
-
-                    await msg.reply(`Ich hab mir gemerkt, dass <@${user.id}> am ${d.getDate().toString().padStart(2, '0')}. ${MONTHS[d.getMonth()]} ${d.getFullYear()} Geburtstag hat!`);
-                } catch (err) {
-                    await msg.reply('Da is irgendetwas schief gelaufen. Laut meinen Unterlagen, ist <@107865644791246848> dafür verantwortlich!');
-                }
+            if (dateMatches === null) {
+                await interaction.reply('Du musst mir schon ein gescheites Datum geben, du Dulli!');
+                return;
             }
-        );
+            const birthDate = dateMatches[0];
+
+            const user = msg.mentions.users.find(user => user.id !== this.blechadler.discordClientId);
+
+            if (!user) {
+                await msg.reply('Du musst mir schon sagen wessen Geburtstag das ist, du Dulli!');
+                return;
+            }
+
+            try {
+                service.addBirthdayEntry(user.id, birthDate, user.username);
+
+                const d = new Date(birthDate);
+
+                await msg.reply(`Ich hab mir gemerkt, dass <@${user.id}> am ${d.getDate().toString().padStart(2, '0')}. ${MONTHS[d.getMonth()]} ${d.getFullYear()} Geburtstag hat!`);
+            } catch (err) {
+                await msg.reply('Da is irgendetwas schief gelaufen. Laut meinen Unterlagen, ist <@107865644791246848> dafür verantwortlich!');
+            }
+        };
+        this.commands.push(birthdayCommand);
     }
 }

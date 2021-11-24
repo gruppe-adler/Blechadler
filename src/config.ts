@@ -1,26 +1,28 @@
 interface TeamspeakConfig {
-    ip: string;
-    port: number;
-    sid: number;
-    username: string;
-    password: string;
-    discordChannelIDs: string[];
+    ip: string
+    port: number
+    sid: number
+    username: string
+    password: string
+    discordChannelIDs: string[]
 }
 
 interface BirthdaysConfig {
-    discordChannelIDs: string[];
+    discordChannelIDs: string[]
 }
 
 interface LeetConfig {
-    discordChannelIDs: string[];
+    discordChannelIDs: string[]
 }
 
 interface Config {
-    token: string;
-    botChannel: string;
-    teamspeak: TeamspeakConfig;
-    birthdays: BirthdaysConfig;
-    leet: LeetConfig;
+    token: string
+    clientId: string
+    guildId: string
+    botChannel: string
+    teamspeak: TeamspeakConfig
+    birthdays: BirthdaysConfig
+    leet: LeetConfig
 }
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires

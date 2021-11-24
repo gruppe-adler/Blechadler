@@ -1,5 +1,7 @@
 {
     "token": "<INSERT DISCORD BOT TOKEN>",
+    "clientId": "668119085267025963",
+    "guildId": "106824005322838016",
     "teamspeak": {
         "ip": "ts.gruppe-adler.de",
         "port": 10011,

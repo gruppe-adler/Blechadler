@@ -3,11 +3,11 @@ import * as path from 'path';
 import generateStore from '../utils/generateJSONArray';
 
 export interface LeetEntry {
-    userID: string;
-    name: string;
-    gold: number;
-    silver: number;
-    bronze: number;
+    userID: string
+    name: string
+    gold: number
+    silver: number
+    bronze: number
     points: number
 }
 
@@ -15,14 +15,14 @@ const LEET_RANKINGS_PATH = path.resolve(__dirname, '../../config/leetRankings.js
 
 export default class LeetService extends EventEmitter {
     private leetRankings: LeetEntry[];
-    private leetCheckHour: number;
-    private leetCheckMinute: number;
+    private readonly leetCheckHour: number;
+    private readonly leetCheckMinute: number;
 
     /**
      * Creates a new LeetService instance.
      *
      */
-    constructor() {
+    constructor () {
         super();
         this.leetRankings = generateStore(LEET_RANKINGS_PATH);
     }
@@ -85,22 +85,8 @@ export default class LeetService extends EventEmitter {
      *
      * @returns All LeetEntry-Points in descending order and with 0-values removed
      */
-    public getSortedPoints(): number[] {
-        const allPoints = [];
-
+    public getSortedPoints (): number[] {
         const allRanks = this.getAllLeetEntries();
-        allRanks.forEach(entry => {
-            allPoints.push(entry.points);
-        });
-
-        // removing all entries with 0 points
-        for (let i = 0; i < allPoints.length; i++) {
-            if (allPoints[i] === 0) {
-                allPoints.splice(i, 1);
-            }
-        }
-
-        const sortedPoints = allPoints.sort((a, b) => { return b - a; });
-        return sortedPoints;
+        return allRanks.map(entry => entry.points).filter(points => points > 0).sort((a, b) => b - a);
     }
 }

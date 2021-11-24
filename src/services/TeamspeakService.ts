@@ -6,53 +6,47 @@ export enum TeamspeakUserType {
 }
 
 export interface TeamspeakUser {
-    id: number;
-    nickname: string;
-    type: TeamspeakUserType;
-    new: boolean;
-    idleTime: number;
-    channelId: number;
+    id: number
+    nickname: string
+    type: TeamspeakUserType
+    new: boolean
+    idleTime: number
+    channelId: number
 }
 
 export interface TeamspeakChannel {
-    name: string;
-    users: TeamspeakUser[];
-    channels: TeamspeakChannel[];
+    name: string
+    users: TeamspeakUser[]
+    channels: TeamspeakChannel[]
 }
 
 declare interface TeamspeakService {
-    on(event: 'connected', listener: (user: TeamspeakUser) => void): this;
-    on(event: 'disconnected', listener: (user: TeamspeakUser) => void): this;
-    on(event: 'query_connected', listener: () => void): this;
-    on(event: 'query_disconnected', listener: () => void): this;
-    on(event: 'error', listener: (err: Error) => void): this;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    on(event: string | symbol, listener: (...args: any[]) => void): this;
+    on: ((event: 'connected', listener: (user: TeamspeakUser) => void) => this) & ((event: 'disconnected', listener: (user: TeamspeakUser) => void) => this) & ((event: 'query_connected', listener: () => void) => this) & ((event: 'query_disconnected', listener: () => void) => this) & ((event: 'error', listener: (err: Error) => void) => this) & ((event: string | symbol, listener: (...args: any[]) => void) => this)
 }
 
 class TeamspeakService extends EventEmitter {
     /**
      * TS Query Client
      */
-    private query: TeamSpeakClient;
+    private readonly query: TeamSpeakClient;
 
     /**
      * Username cache client-id -> nickname
      */
-    private userCache = new Map<number, TeamspeakUser>();
+    private readonly userCache = new Map<number, TeamspeakUser>();
 
     private connected = false;
 
     /**
      * Initial config
      */
-    private config: {
-        ip: string;
-        port: number;
-        sid: number;
-        username: string;
-        password: string;
-        queryTimeout: number;
+    private readonly config: {
+        ip: string
+        port: number
+        sid: number
+        username: string
+        password: string
+        queryTimeout: number
     };
 
     /**
@@ -78,11 +72,11 @@ class TeamspeakService extends EventEmitter {
 
         this.query = new TeamSpeakClient(ip, port);
 
-        this.connectToQuery();
+        void this.connectToQuery();
 
         // we'll try to cache usernames every 60 seconds
         // to make sure we won't miss any nickname changes
-        setInterval(() => this.cacheUsers(), 60 * 1000);
+        setInterval(() => { void this.cacheUsers(); }, 60 * 1000);
         this.query.setTimeout(65 * 1000);
 
         // callback when query reports client joining
@@ -117,7 +111,7 @@ class TeamspeakService extends EventEmitter {
             this.connected = false;
             this.emit('query_disconnected');
             console.log(`[TS3 SERVICE] Trying to reconnect in ${this.queryTimeout / 1000}s`);
-            setTimeout(() => this.connectToQuery(), this.queryTimeout);
+            setTimeout(() => { void this.connectToQuery(); }, this.queryTimeout);
             this.queryTimeout *= 2;
         });
 
@@ -127,7 +121,7 @@ class TeamspeakService extends EventEmitter {
     /**
      * Attempt connect to query
      */
-    private async connectToQuery() {
+    private async connectToQuery (): Promise<void> {
         if (this.connected) return;
 
         try {
@@ -149,13 +143,13 @@ class TeamspeakService extends EventEmitter {
             // Intentionally do nothing, because this.query.close handler will attempt reconnect
         }
 
-        this.cacheUsers();
+        void this.cacheUsers();
     }
 
     /**
      * This method is called periodically and caches all users
      */
-    private async cacheUsers(): Promise<void> {
+    private async cacheUsers (): Promise<void> {
         try {
             const users = await this.getUsers(true);
 
@@ -171,10 +165,8 @@ class TeamspeakService extends EventEmitter {
      * Get user by client id (clid)
      * @param id Client Id
      */
-    private getUserForId(id: number): TeamspeakUser|null {
-        const user = this.userCache.get(id) || null;
-
-        return user;
+    private getUserForId (id: number): TeamspeakUser|null {
+        return this.userCache.get(id) ?? null;
     }
 
     /**
@@ -182,7 +174,7 @@ class TeamspeakService extends EventEmitter {
      * @param unixTimestamp
      * @returns {boolean}
      */
-    private static isNewUser(unixTimestamp: number): boolean {
+    private static isNewUser (unixTimestamp: number): boolean {
         const date = new Date(unixTimestamp * 1000);
         const now = new Date();
         const dif = now.getTime() - date.getTime();
@@ -194,7 +186,7 @@ class TeamspeakService extends EventEmitter {
      * @param {ClientListResponseData} data Query data
      * @returns {TeamspeakUser} User
      */
-    private static queryUserToTeamspeakUser(data: ClientListResponseData): TeamspeakUser {
+    private static queryUserToTeamspeakUser (data: ClientListResponseData): TeamspeakUser {
         return {
             nickname: data.client_nickname,
             id: data.clid,
@@ -210,7 +202,7 @@ class TeamspeakService extends EventEmitter {
      * @param {boolean} returnQueryUsers Return query users (default: false)
      * @returns {Promise<TeamspeakUser[]>} users
      */
-    public async getUsers(returnQueryUsers = false): Promise<TeamspeakUser[]> {
+    public async getUsers (returnQueryUsers = false): Promise<TeamspeakUser[]> {
         const clientList = await this.query.send('clientlist', { '-info': '', '-times': '' });
 
         if (!returnQueryUsers) {
@@ -226,7 +218,7 @@ class TeamspeakService extends EventEmitter {
      * Get all channels
      * @returns {Promise<TeamspeakChannel[]>} channels
      */
-    public async getChannels(): Promise<TeamspeakChannel[]> {
+    public async getChannels (): Promise<TeamspeakChannel[]> {
         const { response: queryChannels } = await this.query.send('channellist', {}, []);
         const usersPromise = this.getUsers();
 
@@ -236,7 +228,7 @@ class TeamspeakService extends EventEmitter {
             const pid = channel.pid;
 
             if (channelsByParent.has(pid)) {
-                channelsByParent.get(pid).push(channel);
+                channelsByParent.get(pid)?.push(channel);
             } else {
                 channelsByParent.set(pid, [channel]);
             }
@@ -249,15 +241,15 @@ class TeamspeakService extends EventEmitter {
             const cid = user.channelId;
 
             if (userByChannel.has(cid)) {
-                userByChannel.get(cid).push(user);
+                userByChannel.get(cid)?.push(user);
             } else {
                 userByChannel.set(cid, [user]);
             }
         }
 
-        const getChildChannels = (id: number): TeamspeakChannel[] => (channelsByParent.get(id) || []).map((data: ChannelListResponseData): TeamspeakChannel => ({
+        const getChildChannels = (id: number): TeamspeakChannel[] => (channelsByParent.get(id) ?? []).map((data: ChannelListResponseData): TeamspeakChannel => ({
             name: data.channel_name,
-            users: userByChannel.get(data.cid) || [],
+            users: userByChannel.get(data.cid) ?? [],
             channels: getChildChannels(data.cid)
         }));
 
@@ -267,7 +259,7 @@ class TeamspeakService extends EventEmitter {
     /**
      * Getter for connected
      */
-    public get isConnected(): boolean {
+    public get isConnected (): boolean {
         return this.connected;
     }
 }

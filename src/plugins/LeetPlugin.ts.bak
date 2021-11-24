@@ -1,0 +1,45 @@
+import LeetService from '../services/LeetService';
+import config from '../config';
+import BlechadlerPlugin from '../core/Plugin';
+
+interface LEETMsgEntry {
+    userID: string,
+    name: string,
+    timestamp: number
+}
+
+const REACTION_ARRAY = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣'];
+const LEET_HOUR = 12;
+const LEET_MINUTE = 38;
+
+export default class LeetPlugin extends BlechadlerPlugin {
+    private dayArray: LEETMsgEntry[] = [];
+    private service = new LeetService();
+
+    setup(): void { // TODO
+    }
+
+    /**
+     * Updates the leet-rankings according to todays entries.
+     */
+    private evaluateDay() {
+        const theWorthy = this.dayArray.slice(0, 3);
+
+        theWorthy.forEach((entry, index) => {
+            const ranking = this.service.getLeetEntry(entry.userID, entry.name);
+            switch (index) {
+            case 0:
+                ranking.gold++;
+                break;
+            case 1:
+                ranking.silver++;
+                break;
+            case 2:
+                ranking.bronze++;
+            }
+            this.service.updateLeetEntry(entry.userID, entry.name, ranking.gold, ranking.silver, ranking.bronze);
+        });
+
+        this.dayArray = [];
+    }
+}

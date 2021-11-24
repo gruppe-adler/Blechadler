@@ -3,3 +3,4 @@ dist/
 config/config.json
 config/birthdays.json
 config/leetRankings.json 
+.history
