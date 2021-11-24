@@ -5,6 +5,8 @@ interface TeamspeakConfig {
     username: string
     password: string
     discordChannelIDs: string[]
+    joinEmoji: string;
+    leaveEmoji: string;
 }
 
 interface BirthdaysConfig {
