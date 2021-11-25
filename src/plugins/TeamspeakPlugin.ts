@@ -11,14 +11,14 @@ export default class TeamspeakPlugin extends BlechadlerPlugin {
     private service!: TeamspeakService; // This is set in setup-method, which is called by the constructor
 
     protected setup (): void {
-        const { ip, port, sid, username, password } = config.teamspeak;
+        const { ip, port, sid, username, password, leaveEmoji, joinEmoji } = config.teamspeak;
         this.service = new TeamspeakService(ip, port, sid, username, password);
 
         // Send message to #ts channel, when user joins Teamspeak
         this.service.on('connected', ({ nickname, type, new: isNewUser }) => {
             if (type === TeamspeakUserType.Query) return;
 
-            this.sendMsg(`➡️  **${nickname}** joined`);
+            this.sendMsg(`:${joinEmoji}:  **${nickname}** joined`);
             if (isNewUser) this.sendMsg(`@here \`${nickname}\` ist neu`);
         });
 
@@ -26,7 +26,7 @@ export default class TeamspeakPlugin extends BlechadlerPlugin {
         this.service.on('disconnected', ({ nickname, type }) => {
             if (type === TeamspeakUserType.Query) return;
 
-            this.sendMsg(`⬅️  **${nickname}** left`);
+            this.sendMsg(`:${leaveEmoji}:  **${nickname}** left`);
         });
     }
 

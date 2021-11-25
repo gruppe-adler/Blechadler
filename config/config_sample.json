@@ -8,6 +8,8 @@
         "sid": 2,
         "username": "Blechadler",
         "password": "<ENTER QUERY PASSWORD HERE>",
+        "joinEmoji":  "arrow_right_green",
+        "leaveEmoji": "arrow_left_red",
         "discordChannelIDs": ["296530538855137282"]
     },
     "birthdays": { 
