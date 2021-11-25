@@ -18,7 +18,9 @@ export default class Blechadler {
 
     constructor () {
         this.client = new Discord.Client({ invalidRequestWarningInterval: 10, intents: ['GUILDS', 'GUILD_MESSAGES'] });
-        void this.client.login(config.token);
+
+        this.installPlugins();
+        this.registerCommandListener();
 
         this.client.on('ready', () => {
             console.log('Discord Logged In');
@@ -29,15 +31,14 @@ export default class Blechadler {
             );
         });
 
-        this.installPlugins();
-        this.registerCommandListener();
+        void this.client.login(config.token);
     }
 
     private installPlugins (): void {
         const pluginFiles = fs.readdirSync(path.join(__dirname, '..', 'plugins'));
 
         for (const file of pluginFiles) {
-            if (!/.*\.js$/.test(file)) continue;
+            if (!/^.+\.(js|ts)$/.test(file)) continue;
             // eslint-disable-next-line @typescript-eslint/no-var-requires
             const Plugin = require(path.join(__dirname, '..', 'plugins', file)).default;
 
