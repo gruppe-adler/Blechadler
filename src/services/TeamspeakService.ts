@@ -82,16 +82,20 @@ class TeamspeakService extends EventEmitter {
         // callback when query reports client joining
         this.query.on('cliententerview', clients => {
             clients.forEach(async client => {
-                // we don't get a full client when notified so we'll have to retrieve the full client info
-                const { response: fullClientList } = await this.query.send('clientinfo', { clid: client.clid });
-                if (fullClientList.length === 0) return;
-                const fullClient = fullClientList[0];
+                try {
+                    // we don't get a full client when notified so we'll have to retrieve the full client info
+                    const { response: fullClientList } = await this.query.send('clientinfo', { clid: client.clid });
+                    if (fullClientList.length === 0) return;
+                    const fullClient = fullClientList[0];
 
-                const user = TeamspeakService.queryUserToTeamspeakUser(fullClient);
+                    const user = TeamspeakService.queryUserToTeamspeakUser(fullClient);
 
-                this.userCache.set(client.clid, user);
+                    this.userCache.set(client.clid, user);
 
-                this.emit('connected', user);
+                    this.emit('connected', user);
+                } catch (err) {
+
+                }
             });
         });
 

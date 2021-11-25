@@ -43,6 +43,7 @@ export default class Blechadler {
             const Plugin = require(path.join(__dirname, '..', 'plugins', file)).default;
 
             const plugin = new Plugin();
+            this.plugins.push(plugin);
             for (const command of plugin.getCommands()) {
                 this.commands.set(command.builder.name, command);
             }
