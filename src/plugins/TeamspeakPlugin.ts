@@ -39,7 +39,7 @@ export default class TeamspeakPlugin extends BlechadlerPlugin {
     public getCommands (): BlechadlerCommand[] {
         return [
             {
-                builder: new SlashCommandBuilder().setName('ts').setDescription('Online Teamspeak Nutzer anzeigen').setDefaultPermission(true),
+                builder: new SlashCommandBuilder().setName('ts').setDescription('Aktuelle Teamspeak Nutzer anzeigen').setDefaultPermission(true),
                 callback: async (interaction: CommandInteraction) => {
                     if (!this.config.discordChannelIDs.includes(interaction.channelId)) {
                         void interaction.reply({ content: 'Du bist im falschen Channel unterwegs 🙄', ephemeral: true });
