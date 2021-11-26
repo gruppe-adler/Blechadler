@@ -4,10 +4,10 @@ import BlechadlerCommand from './Command';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
 import BlechadlerPlugin from './Plugin';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const fs = require('fs');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const path = require('path');
+import * as fs from 'fs';
+import * as path from 'path';
+
+type BlechadlerPluginConstructor = new (bot: Blechadler) => BlechadlerPlugin;
 
 export default class Blechadler {
     public commands: Discord.Collection<string, BlechadlerCommand> = new Discord.Collection();
@@ -19,7 +19,7 @@ export default class Blechadler {
     constructor () {
         this.client = new Discord.Client({ invalidRequestWarningInterval: 10, intents: ['GUILDS', 'GUILD_MESSAGES'] });
 
-        this.installPlugins();
+        void this.installPlugins();
         this.registerCommandListener();
 
         this.client.on('ready', () => {
@@ -34,15 +34,14 @@ export default class Blechadler {
         void this.client.login(config.token);
     }
 
-    private installPlugins (): void {
+    private async installPlugins (): Promise<void> {
         const pluginFiles = fs.readdirSync(path.join(__dirname, '..', 'plugins'));
 
         for (const file of pluginFiles) {
             if (!/^.+\.(js|ts)$/.test(file)) continue;
-            // eslint-disable-next-line @typescript-eslint/no-var-requires
-            const Plugin = require(path.join(__dirname, '..', 'plugins', file)).default;
+            const { default: PluginConstructor } = await import(path.join(__dirname, '..', 'plugins', file)) as { default: BlechadlerPluginConstructor };
 
-            const plugin = new Plugin();
+            const plugin = new PluginConstructor(this);
             this.plugins.push(plugin);
             for (const command of plugin.getCommands()) {
                 this.commands.set(command.builder.name, command);
