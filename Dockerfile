@@ -1,4 +1,4 @@
-FROM node:12-alpine as builder
+FROM node:16-alpine as builder
 
 # Create app directory
 WORKDIR /usr/src/app
@@ -16,7 +16,7 @@ COPY . .
 
 RUN npm run build
 
-FROM node:12-alpine
+FROM node:16-alpine
 
 # Create app directory
 WORKDIR /usr/src/app
