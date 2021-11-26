@@ -1,9 +1,12 @@
 import { EventEmitter } from 'events';
 import { ChannelListResponseData, ClientListResponseData, TeamSpeakClient } from 'node-ts';
+import MAIN_LOGGER from '../core/logger';
 export enum TeamspeakUserType {
     Normal = 0,
     Query = 1
 }
+
+const logger = MAIN_LOGGER.child({ module: 'ts3-service' });
 
 export interface TeamspeakUser {
     id: number
@@ -94,7 +97,7 @@ class TeamspeakService extends EventEmitter {
 
                     this.emit('connected', user);
                 } catch (err) {
-
+                    logger.error('Error fetching client info: ' + JSON.stringify(err));
                 }
             });
         });
@@ -114,7 +117,7 @@ class TeamspeakService extends EventEmitter {
         this.query.on('close', () => {
             this.connected = false;
             this.emit('query_disconnected');
-            console.log(`[TS3 SERVICE] Trying to reconnect in ${this.queryTimeout / 1000}s`);
+            logger.info(`Trying to reconnect in ${this.queryTimeout / 1000}s`);
             setTimeout(() => { void this.connectToQuery(); }, this.queryTimeout);
             this.queryTimeout *= 2;
         });
@@ -145,6 +148,7 @@ class TeamspeakService extends EventEmitter {
             this.emit('query_connected');
         } catch (err) {
             // Intentionally do nothing, because this.query.close handler will attempt reconnect
+            logger.error('Error connecting to query: ' + JSON.stringify(err));
         }
 
         void this.cacheUsers();
@@ -162,6 +166,7 @@ class TeamspeakService extends EventEmitter {
             }
         } catch (err) {
             // Intentionally do nothing... it's not that bad if we fail
+            logger.error('Error caching users: ' + JSON.stringify(err));
         }
     }
 

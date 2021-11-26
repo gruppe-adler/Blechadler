@@ -6,6 +6,7 @@ import { Routes } from 'discord-api-types/v9';
 import BlechadlerPlugin from './Plugin';
 import * as fs from 'fs';
 import * as path from 'path';
+import logger from './logger';
 
 type BlechadlerPluginConstructor = new (bot: Blechadler) => BlechadlerPlugin;
 
@@ -23,7 +24,7 @@ export default class Blechadler {
         this.registerCommandListener();
 
         this.client.on('ready', () => {
-            console.log('Discord Logged In');
+            logger.info('Discord Logged In');
 
             void this.restClient.put(
                 Routes.applicationGuildCommands(config.clientId, config.guildId),
@@ -60,8 +61,8 @@ export default class Blechadler {
             try {
                 await command.callback(interaction);
             } catch (error) {
-                console.error(error);
-                await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+                logger.error('Error executing command: ' + JSON.stringify(error));
+                await interaction.reply({ content: 'Da is irgendetwas schief gelaufen 😰. Bitte hau mich nicht 🥺', ephemeral: true });
             }
         });
     }
@@ -73,8 +74,8 @@ export default class Blechadler {
             if (channel?.isText() ?? false) {
                 await (channel as Discord.TextChannel).send(msg);
             }
-        } catch (err) {
-
+        } catch (error) {
+            logger.error('Error sending message: ' + JSON.stringify(error));
         }
     }
 }

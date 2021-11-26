@@ -5,6 +5,7 @@ import config from '../config';
 import BlechadlerPlugin from '../core/Plugin';
 import BlechadlerCommand from '../core/Command';
 import TeamspeakService, { TeamspeakChannel, TeamspeakUser, TeamspeakUserType } from '../services/TeamspeakService';
+import logger from '../core/logger';
 
 export default class TeamspeakPlugin extends BlechadlerPlugin {
     private readonly config = config.teamspeak;
@@ -77,7 +78,8 @@ export default class TeamspeakPlugin extends BlechadlerPlugin {
                         response += '▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬';
 
                         await interaction.editReply(response);
-                    } catch (err) {
+                    } catch (error) {
+                        logger.error('Error constructing TS3-message: ' + JSON.stringify(error));
                         await interaction.editReply('Da is irgendetwas schief gelaufen 😰. Bitte hau mich nicht 🥺');
                     }
                 }
