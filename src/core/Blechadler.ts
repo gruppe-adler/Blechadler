@@ -30,6 +30,8 @@ export default class Blechadler {
                 Routes.applicationGuildCommands(config.clientId, config.guildId),
                 { body: Array.from(this.commands.values()).map(command => command.builder.toJSON()) }
             );
+
+            this.plugins.forEach(plugin => plugin.onDiscordReady());
         });
 
         void this.client.login(config.token);
@@ -65,6 +67,10 @@ export default class Blechadler {
                 await interaction.reply({ content: 'Da is irgendetwas schief gelaufen 😰. Bitte hau mich nicht 🥺', ephemeral: true });
             }
         });
+    }
+
+    public getEmoji (name: string): Discord.GuildEmoji|undefined {
+        return this.client.emojis.cache.find(e => e.name === name);
     }
 
     public async sendMsg (channelId: string, msg: string | Discord.MessagePayload | Discord.MessageOptions): Promise<void> {

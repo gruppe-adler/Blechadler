@@ -12,14 +12,22 @@ export default class TeamspeakPlugin extends BlechadlerPlugin {
     private service!: TeamspeakService; // This is set in setup-method, which is called by the constructor
 
     protected setup (): void {
-        const { ip, port, sid, username, password, leaveEmoji, joinEmoji } = config.teamspeak;
+        const { ip, port, sid, username, password } = config.teamspeak;
+
         this.service = new TeamspeakService(ip, port, sid, username, password);
+    }
+
+    public onDiscordReady (): void {
+        const { leaveEmoji: leaveEmojiStr, joinEmoji: joinEmojiStr } = this.config;
+
+        const joinEmoji = this.blechadler.getEmoji(joinEmojiStr)?.toString() ?? '➡️';
+        const leaveEmoji = this.blechadler.getEmoji(leaveEmojiStr)?.toString() ?? '⬅️';
 
         // Send message to #ts channel, when user joins Teamspeak
         this.service.on('connected', ({ nickname, type, new: isNewUser }) => {
             if (type === TeamspeakUserType.Query) return;
 
-            this.sendMsg(`:${joinEmoji}:  **${nickname}** joined`);
+            this.sendMsg(`${joinEmoji}  **${nickname}** joined`);
             if (isNewUser) this.sendMsg(`@here \`${nickname}\` ist neu`);
         });
 
@@ -27,7 +35,7 @@ export default class TeamspeakPlugin extends BlechadlerPlugin {
         this.service.on('disconnected', ({ nickname, type }) => {
             if (type === TeamspeakUserType.Query) return;
 
-            this.sendMsg(`:${leaveEmoji}:  **${nickname}** left`);
+            this.sendMsg(`${leaveEmoji}  **${nickname}** left`);
         });
     }
 

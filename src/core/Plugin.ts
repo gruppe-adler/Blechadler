@@ -16,4 +16,6 @@ export default abstract class BlechadlerPlugin {
     }
 
     protected abstract setup (): void;
+
+    public onDiscordReady (): void {};
 }
