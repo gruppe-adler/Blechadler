@@ -7,15 +7,18 @@ import BlechadlerPlugin from './Plugin';
 import * as fs from 'fs';
 import * as path from 'path';
 import logger from './logger';
+import BlechadlerDigestor from './Digestor';
+import BlechadlerError from './Error';
 
 type BlechadlerPluginConstructor = new (bot: Blechadler) => BlechadlerPlugin;
 
 export default class Blechadler {
     public commands: Discord.Collection<string, BlechadlerCommand> = new Discord.Collection();
+    public digestors: Discord.Collection<string, BlechadlerDigestor> = new Discord.Collection();
     private readonly plugins: BlechadlerPlugin[] = [];
     private readonly restClient = new REST({ version: '9' }).setToken(config.token);
 
-    private readonly client: Discord.Client;
+    public readonly client: Discord.Client;
 
     constructor () {
         this.client = new Discord.Client({ invalidRequestWarningInterval: 10, intents: ['GUILDS', 'GUILD_MESSAGES'] });
@@ -49,22 +52,49 @@ export default class Blechadler {
             for (const command of plugin.getCommands()) {
                 this.commands.set(command.builder.name, command);
             }
+            for (const digestor of plugin.getDigestors()) {
+                this.digestors.set(digestor.name, digestor);
+            }
         }
     }
 
     private registerCommandListener (): void {
-        this.client.on('interactionCreate', async (interaction: Discord.CommandInteraction) => {
-            if (!interaction.isCommand()) return;
+        this.client.on('interactionCreate', async (interaction) => {
+            if (interaction.isCommand()) {
+                const command = this.commands.get(interaction.commandName);
 
-            const command = this.commands.get(interaction.commandName);
+                if (command === undefined) {
+                    await interaction.reply({ content: 'Diesen Befehl kenne ich nicht 😰. Bitte hau mich nicht 🥺', ephemeral: true });
+                    return;
+                }
 
-            if (command == null) return;
+                try {
+                    await command.callback(interaction);
+                } catch (error) {
+                    logger.error('Error executing command: ' + JSON.stringify(error));
+                    logger.error(error);
 
-            try {
-                await command.callback(interaction);
-            } catch (error) {
-                logger.error('Error executing command: ' + JSON.stringify(error));
-                await interaction.reply({ content: 'Da is irgendetwas schief gelaufen 😰. Bitte hau mich nicht 🥺', ephemeral: true });
+                    if (error instanceof BlechadlerError) {
+                        if (interaction.deferred || interaction.replied) {
+                            await interaction.editReply({ content: error.messageContent });
+                        } else {
+                            await interaction.reply({ content: error.messageContent, ephemeral: error.ephemeral });
+                        }
+                    }
+                }
+                return;
+            }
+
+            if (interaction.isModalSubmit()) {
+                const digestor = this.digestors.get(interaction.customId);
+
+                try {
+                    if (digestor == null) throw new Error(`Could not fund digestor for command ${interaction.customId}.`);
+                    await digestor.callback(interaction);
+                } catch (error) {
+                    logger.error('Error executing digestor: ' + JSON.stringify(error));
+                    await interaction.reply({ content: 'Da is irgendetwas schief gelaufen 😰. Bitte hau mich nicht 🥺', ephemeral: true });
+                }
             }
         });
     }

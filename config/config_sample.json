@@ -17,5 +17,10 @@
     },
     "leet": { 
         "discordChannelIDs": []
+    },
+    "offtopic": {
+        "allowedRoles": [],
+        "mainCategory": "",
+        "archiveCategory": ""
     }
 }

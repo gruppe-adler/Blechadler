@@ -1,5 +1,6 @@
 import Blechadler from './Blechadler';
 import BlechadlerCommand from './Command';
+import BlechadlerDigestor from './Digestor';
 
 export default abstract class BlechadlerPlugin {
     protected blechadler: Blechadler;
@@ -12,6 +13,10 @@ export default abstract class BlechadlerPlugin {
     }
 
     public getCommands (): BlechadlerCommand[] {
+        return [];
+    }
+
+    public getDigestors (): BlechadlerDigestor[] {
         return [];
     }
 

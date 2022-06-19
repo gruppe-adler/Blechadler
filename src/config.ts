@@ -17,6 +17,12 @@ interface LeetConfig {
     discordChannelIDs: string[]
 }
 
+interface OfftopicConfig {
+    allowedRoles: string[]
+    mainCategory: string
+    archiveCategory: string
+}
+
 interface Config {
     token: string
     clientId: string
@@ -25,6 +31,7 @@ interface Config {
     teamspeak: TeamspeakConfig
     birthdays: BirthdaysConfig
     leet: LeetConfig
+    offtopic: OfftopicConfig
 }
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
