@@ -344,7 +344,7 @@ export default class OfftopicPlugin extends BlechadlerPlugin {
                 messageContent: `Diggi 🤔 der Channel ist doch gar nicht in <#${fromCategory}> 😑`
             });
         }
-        await channel.setParent(toCategory);
+        await channel.setParent(toCategory, { lockPermissions: false });
         await this.orderCategory(guildID, toCategory);
     }
 
